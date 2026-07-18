@@ -219,11 +219,13 @@
   }
 
   async function requestPasswordReset(email) {
-    const body = { email };
-    const redirectTo = getPasswordResetRedirectUrl();
-    if (redirectTo) body.redirect_to = redirectTo;
-    return authRequest('recover', body);
-  }
+  const redirectTo = getPasswordResetRedirectUrl();
+  const path = redirectTo
+    ? `recover?redirect_to=${encodeURIComponent(redirectTo)}`
+    : 'recover';
+
+  return authRequest(path, { email });
+}
 
   function consumePasswordRecoveryFromUrl() {
     const hashParams = new URLSearchParams(String(window.location.hash || '').replace(/^#/, ''));
