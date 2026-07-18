@@ -1,0 +1,32 @@
+// 依「上市時程表.xlsx」整理出來的預設時程節點
+// 可在【設定】頁調整節點、部門與工作日數。
+window.defaultScheduleNodes = [
+  { node_name: '開發需求單', department: '產品/行銷', work_days: 1 },
+  { node_name: '回覆開發需求單', department: '研發', work_days: 5 },
+  { node_name: '提供樣品', department: '研發', work_days: 15 },
+  { node_name: '樣品規格確認＋轉播需求信', department: '產品/行銷', work_days: 5 },
+  { node_name: '財務提供轉播價', department: '財務', work_days: 5 },
+  { node_name: '行銷訴求、命名確認', department: 'PM', work_days: 10 },
+  { node_name: '業務提品確認', department: '產品', work_days: 15 },
+  { node_name: '樣回回覆（口味確認）', department: '', work_days: 0 },
+  { node_name: '料號申請（檢驗申請）', department: '產品', work_days: 1 },
+  { node_name: '料號建檔完成', department: 'All', work_days: 7 },
+  { node_name: '八大檢驗 / 微生物檢驗結果', department: '品保', work_days: 9 },
+  { node_name: '營養標提供', department: '研發', work_days: 3 },
+  { node_name: '條碼提供', department: '產品', work_days: 3 },
+  { node_name: '口味貼審核申請', department: '產品', work_days: 2 },
+  { node_name: '口味貼審核完成', department: '產品、研發、品保', work_days: 5 },
+  { node_name: '包裝審核申請', department: '產品', work_days: 2 },
+  { node_name: '包裝審核完成', department: '產品、研發、品保', work_days: 5 },
+  { node_name: '請購需求確認（信）', department: '產品', work_days: 1 },
+  { node_name: '採購 / 提供廠商完稿', department: '採購', work_days: 5 },
+  { node_name: '包裝檔確稿', department: '設計、品保', work_days: 1 },
+  { node_name: '包裝交期確認', department: '採購', work_days: 3 },
+  { node_name: '包裝到貨', department: '採購', work_days: 40 },
+  { node_name: '試俥', department: '', work_days: 0 },
+  { node_name: '大貨（首批）排產', department: '生產、研發', work_days: 10 },
+  { node_name: '大貨試吃回覆', department: '研發', work_days: 1 },
+  { node_name: '大貨（首批）包裝入庫', department: '生產', work_days: 2 },
+  { node_name: '轉倉', department: '訂單管理', work_days: 2 },
+  { node_name: '可出貨日', department: '產品', work_days: 1 }
+];

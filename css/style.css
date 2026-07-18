@@ -1,0 +1,229 @@
+:root{--bg:#f6f4ee;--panel:#fffaf1;--card:#fff;--text:#2b2722;--muted:#7b7166;--line:#e6ddd0;--primary:#8a5a28;--primary2:#b77a34;--danger:#b3261e;--green:#2e7d32;--yellow:#8a6d00;--blue:#28608a;--shadow:0 10px 30px rgba(63,46,25,.08)}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",Arial,sans-serif}.topbar{position:sticky;top:0;z-index:10;margin-left:230px;display:flex;justify-content:space-between;gap:20px;align-items:center;padding:22px 28px;background:rgba(246,244,238,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}h1,h2,h3,h4,p{margin-top:0}.eyebrow{font-size:13px;letter-spacing:.08em;color:var(--primary);font-weight:700}.subtle,.view-title p,.record-meta,.empty{color:var(--muted)}.top-actions,.form-actions,.card-actions,.tabs{display:flex;gap:8px;flex-wrap:wrap}.btn,.nav-btn,.flow-step,.mini,.tab,.mini-line,.cal-event{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;cursor:pointer;color:var(--text);font-weight:650}.btn:hover,.nav-btn:hover,.flow-step:hover,.mini:hover,.tab:hover,.mini-line:hover{border-color:var(--primary2)}.btn.primary{background:var(--primary);color:white;border-color:var(--primary)}.danger,.danger-light{color:var(--danger)}.danger-light{background:#fff7f5;border-color:#f0c9c4}.sidebar{position:fixed;top:0;left:0;bottom:0;width:230px;padding:18px 14px;background:#2b2722;color:#fff;display:flex;flex-direction:column;gap:8px}.sidebar:before{content:'功能選單';font-size:13px;color:#d9c8b3;letter-spacing:.1em;margin:8px 8px 12px}.nav-btn{background:transparent;color:#f9f0e6;border-color:rgba(255,255,255,.14);text-align:left}.nav-btn.active{background:#fffaf1;color:#2b2722}.main{margin-left:230px;padding:24px 28px 60px}.view{display:none}.view.active{display:block}.view-title{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}.grid{display:grid;gap:14px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.grid.form-and-list{grid-template-columns:minmax(420px,.95fr) minmax(420px,1.05fr);align-items:start}.card,.stat,.record-card,.project-card,.sample-card,.attachment-card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.card{padding:18px;margin-bottom:16px}.stats-grid{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:12px;margin-bottom:18px}.stat{padding:16px}.stat span{display:block;color:var(--muted);font-size:13px}.stat strong{display:block;font-size:30px;margin:6px 0}.stat em{font-style:normal;color:var(--muted);font-size:12px}label{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:700;color:#4b4137}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:#fff;color:var(--text);font:inherit}textarea{resize:vertical}.record-form{display:grid;gap:12px}.filters{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:8px;margin-bottom:12px}.filters.line{display:block}.list-head{display:flex;justify-content:space-between;align-items:center}.pill,.badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:4px 9px;background:#f3eadc;color:#6b4c25;font-size:12px;font-weight:700}.records-list{display:grid;gap:10px}.record-card{padding:14px}.record-card.overdue{border-color:#e2aaa4;background:#fff8f6}.record-top{display:flex;justify-content:space-between;gap:8px;align-items:start}.record-card h4{margin:8px 0 6px}.record-card p{white-space:pre-wrap;color:#4b4137}.next-line{font-size:13px;color:var(--muted);background:#fbf7ef;border-radius:10px;padding:8px;margin:8px 0}.mini{font-size:12px;padding:7px 10px;border-radius:9px}.status-進行中{background:#e9f3ff;color:#15508a}.status-待處理{background:#fff4ce;color:#725800}.status-等待回覆{background:#fff0d6;color:#8a4b00}.status-已完成,.status-已結案{background:#e9f7ec;color:#23632b}.status-暫停,.status-突然結案{background:#ece7e1;color:#5d5750}.flow-list{display:grid;grid-template-columns:repeat(5,minmax(140px,1fr));gap:10px}.flow-step{text-align:left;background:#fffaf1}.compact-list{display:grid;gap:8px}.mini-line{display:flex;justify-content:space-between;gap:10px;align-items:center;text-align:left;background:#fff;width:100%;font-weight:500}.mini-line b{color:var(--primary)}.project-board{display:grid;grid-template-columns:repeat(3,minmax(240px,1fr));gap:14px}.project-card,.sample-card,.attachment-card{padding:16px}.project-card h3{margin:10px 0}.stage-row{display:flex;justify-content:space-between;align-items:center;margin:10px 0;padding:9px;background:#fbf7ef;border-radius:10px}.timeline{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px}.time-item{display:grid;grid-template-columns:120px 1fr;gap:14px;position:relative;padding:0 0 18px}.time-item:before{content:'';position:absolute;left:112px;top:4px;bottom:0;border-left:2px solid var(--line)}.time-date{font-weight:800;color:var(--primary)}.time-body{background:#fffaf1;border:1px solid var(--line);border-radius:14px;padding:12px}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:16px}.cal-head{text-align:center;font-weight:800;color:var(--muted);padding:8px}.cal-cell{min-height:120px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:5px}.cal-cell.blank{background:transparent;border:0}.cal-event{font-size:12px;padding:5px 6px;border-radius:8px;text-align:left;background:#fffaf1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.more{font-size:12px;color:var(--muted)}.sample-grid,.attachment-grid{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:14px}.attachment-card code{display:block;background:#2b2722;color:#fff7ec;border-radius:10px;padding:9px;word-break:break-all;margin:10px 0}.field-table{width:100%;border-collapse:collapse;background:#fff}.field-table th,.field-table td{padding:12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.field-table th{background:#fbf7ef;color:var(--primary)}.note-box{background:#2b2722;color:#fff7ec;padding:16px;border-radius:14px;white-space:pre-wrap}.toast{position:fixed;right:24px;bottom:24px;background:#2b2722;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:.2s;pointer-events:none}.toast.show{opacity:1;transform:translateY(0)}@media(max-width:1100px){.topbar,.main{margin-left:0}.sidebar{position:static;width:auto;flex-direction:row;overflow:auto}.topbar{position:static;display:block}.top-actions{margin-top:12px}.grid.form-and-list,.grid.two,.grid.three,.stats-grid,.project-board,.sample-grid,.attachment-grid,.flow-list{grid-template-columns:1fr}.filters{grid-template-columns:1fr}.calendar-grid{font-size:13px}.cal-cell{min-height:90px}}
+.settings-grid{align-items:start}.inline-form{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}.hint{font-size:13px;color:var(--muted);background:#fbf7ef;border:1px dashed var(--line);border-radius:12px;padding:9px;margin:8px 0}.master-list{display:grid;gap:8px;margin-top:12px;max-height:380px;overflow:auto}.master-item{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fffaf1}.master-item span{word-break:break-word}.grid.one{grid-template-columns:1fr}
+/* v5 上市時程與專案總覽調整 */
+.project-board{grid-template-columns:1fr}
+.project-card-wide{padding:18px 18px 20px}
+.project-schedule-summary{background:#fbf7ef;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:10px 0;color:#4b4137}
+.project-records{margin-top:14px;display:grid;gap:8px}
+.project-record-line{display:grid;grid-template-columns:110px 110px 1fr auto;gap:8px;align-items:start;border:1px solid var(--line);background:#fffaf1;border-radius:12px;padding:10px}
+.project-record-line p{margin:0;white-space:pre-wrap;color:#4b4137}
+.schedule-editor{margin:14px 0;padding:14px;border:1px dashed var(--primary2);border-radius:14px;background:#fffdf8}
+.schedule-table-wrap{max-height:360px;overflow:auto;border-radius:12px;border:1px solid var(--line);background:#fff}
+.compact-table th,.compact-table td{padding:8px 10px;font-size:13px}
+.schedule-node-list{max-height:520px}.schedule-node-item span:first-child{display:flex;flex-direction:column;gap:3px}.schedule-node-item small{color:var(--muted);font-size:12px}.node-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.schedule-master-card{grid-column:1 / -1}
+@media(max-width:900px){.project-record-line{grid-template-columns:1fr}.schedule-editor .grid.three{grid-template-columns:1fr}}
+
+/* v6 additions */
+.settings-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}.settings-tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 14px;cursor:pointer;font-weight:800;color:var(--text)}.settings-tab.active{background:var(--primary);border-color:var(--primary);color:#fff}.settings-panel{display:none}.settings-panel.active{display:block}.grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}.inline-form{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}.master-list{display:grid;gap:8px;margin-top:12px}.master-item{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fbf7ef;border:1px solid var(--line);border-radius:12px;padding:10px}.master-item span small{display:block;color:var(--muted);font-weight:500;margin-top:4px}.product-status-item{grid-template-columns:1fr 150px auto}.mini-select{max-width:150px;padding:7px 10px;border-radius:9px;font-size:12px}.schedule-node-item .node-actions{display:flex;gap:6px;justify-content:flex-end}.project-schedule-summary{background:#fbf7ef;border-radius:10px;padding:9px;margin:10px 0}.project-records{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}.project-record-line{display:grid;grid-template-columns:92px 95px 1fr auto;gap:8px;align-items:start;padding:8px;border-bottom:1px solid var(--line)}.project-record-line p{margin:0}.project-card-wide{grid-column:1/-1}.schedule-editor{background:#fffaf1;border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}.schedule-table-wrap{overflow:auto}.compact-table th,.compact-table td{padding:8px}
+@media(max-width:1100px){.grid.four{grid-template-columns:1fr}.inline-form{grid-template-columns:1fr}.project-record-line{grid-template-columns:1fr}.mini-select{max-width:none}.settings-tabs{display:grid;grid-template-columns:1fr 1fr}}
+
+/* v7 additions */
+.calendar-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.calendar-controls input{min-width:160px}.calendar-multi{display:grid;grid-template-columns:repeat(3,minmax(260px,1fr));gap:14px;margin-bottom:16px}.calendar-month-card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:14px}.calendar-month-card h3{margin:0 0 10px;color:var(--primary)}.cal-event-row{font-size:12px;padding:5px 6px;border:1px solid var(--line);border-radius:8px;background:#fffaf1;display:grid;grid-template-columns:1fr auto auto;gap:4px;align-items:center}.cal-event-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cal-mini{font-size:11px;border:1px solid var(--line);background:#fff;border-radius:7px;padding:3px 6px;cursor:pointer;color:var(--text);font-weight:700}.cal-mini:hover{border-color:var(--primary2)}.agenda-line{display:grid;grid-template-columns:auto 1fr auto}.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(28,22,16,.35);z-index:60;align-items:center;justify-content:center;padding:20px}.modal-backdrop.show{display:flex}.modal-card{width:min(720px,96vw);max-height:84vh;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.2);padding:18px}.modal-head{display:flex;justify-content:space-between;align-items:start;gap:12px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px}.modal-note{white-space:pre-wrap;background:#fffaf1;border:1px solid var(--line);border-radius:14px;padding:14px;line-height:1.7;margin-bottom:12px}.record-note{white-space:pre-wrap;color:#4b4137;margin:10px 0}.record-card h4{display:none}
+@media(max-width:1200px){.calendar-multi{grid-template-columns:1fr}.calendar-month-card .cal-cell{min-height:90px}}
+
+
+/* v8 additions: project timeline button and continuous single-column calendar */
+.calendar-multi{display:grid;grid-template-columns:1fr;gap:18px;margin-bottom:16px}
+.calendar-month-card{padding:16px}.calendar-month-card h3{font-size:22px;margin-bottom:12px}
+.outside-month{background:#f4efe7;color:#a0968a}.outside-month b{opacity:.55}.calendar-control-cell{background:#fff7e8;border-style:dashed;align-items:center;justify-content:center}.month-cell-btn{width:100%;border:1px solid var(--primary2);background:#fffaf1;color:var(--primary);border-radius:10px;padding:8px 10px;cursor:pointer;font-weight:900}.month-cell-btn:hover{background:#f3eadc}.two-line-event{display:grid;grid-template-columns:1fr;gap:5px;padding:6px}.two-line-event .cal-event-text{display:grid;gap:2px;min-width:0}.two-line-event .cal-event-text b{font-size:12px;line-height:1.3;white-space:normal;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.two-line-event .cal-event-text span{font-size:11px;color:var(--muted);white-space:normal;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.cal-event-actions{display:flex;gap:4px;justify-content:flex-start}.two-line-agenda{display:grid;grid-template-columns:1fr auto;align-items:start}.two-line-agenda div{display:grid;gap:3px}.two-line-agenda span{color:var(--muted)}
+@media(max-width:900px){.cal-cell{min-height:105px}.two-line-event .cal-event-text b{font-size:11px}}
+
+/* v9: 上市時程節點列表不使用內層卷軸，避免雙層捲動 */
+.master-list,
+.schedule-node-list,
+.schedule-table-wrap,
+.schedule-table-wrap.no-inner-scroll {
+  max-height: none !important;
+  overflow: visible !important;
+}
+.editable-schedule-table .table-date-input {
+  min-width: 145px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+.editable-schedule-table th,
+.editable-schedule-table td {
+  vertical-align: middle;
+}
+
+/* v10: 上市時程移到設定 > 產品口味＋規格＋狀態 */
+.product-master-block{display:grid;gap:8px}
+.product-master-block .schedule-editor{margin:0 0 10px 0}
+.product-status-item{flex-wrap:wrap}
+.product-status-item > span{flex:1 1 260px}
+.project-info-box{display:block;background:#fffaf1;border:1px solid var(--line);border-radius:14px;padding:12px;margin:12px 0;color:#4b4137}.project-info-header{display:flex;align-items:center;justify-content:space-between;gap:10px}.project-info-header strong{font-weight:900}.project-info-box.collapsed{padding:10px 12px}.project-info-box textarea{margin-top:8px;min-height:230px;line-height:1.65;font-weight:500;white-space:pre-wrap;background:#fff}.project-info-box textarea:focus{outline:2px solid rgba(138,90,40,.18);border-color:var(--primary2)}.project-info-preview{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.5;white-space:normal}
+.auth-box{background:#f8fbff;border:1px solid var(--line);border-radius:16px;padding:14px;margin:12px 0}.auth-box h4{margin:0 0 6px}.auth-box .form-actions{margin-top:8px}
+
+.debug-box{margin-top:12px;background:#fff;border:1px dashed var(--danger);border-radius:14px;padding:12px;color:#4b4137}.debug-box summary{cursor:pointer;font-weight:900;color:var(--danger)}.debug-box pre{white-space:pre-wrap;word-break:break-word;background:#2b2722;color:#fff7ec;padding:12px;border-radius:12px;max-height:420px;overflow:auto;font-size:12px;line-height:1.55}
+.timeline-project-status{margin:0 0 12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fffaf1;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.settings-project-info{margin-top:10px}.product-status-item{align-items:flex-start}.product-status-item .mini-select{min-width:110px}
+.schedule-date-control{display:flex;align-items:center;gap:4px;flex-wrap:nowrap}.schedule-date-control .table-date-input{min-width:112px}
+
+/* v34 SAP-like theme + font size -2px */
+:root{
+  --bg:#eef3f5;
+  --panel:#f6f8f9;
+  --card:#ffffff;
+  --text:#1d2d3a;
+  --muted:#5d6b75;
+  --line:#d4dde3;
+  --primary:#0a6ed1;
+  --primary2:#0854a0;
+  --danger:#bb0000;
+  --green:#107e3e;
+  --yellow:#e9730c;
+  --blue:#0a6ed1;
+  --shadow:0 1px 2px rgba(0,0,0,.12);
+}
+html{font-size:14px}
+body{background:var(--bg);color:var(--text);font-size:14px;font-family:"Segoe UI",Arial,"Noto Sans TC",sans-serif}
+.topbar{margin-left:0;padding:10px 20px;background:#354a5f;color:#fff;border-bottom:1px solid #223548;box-shadow:0 2px 5px rgba(0,0,0,.25)}
+.topbar h1{font-size:18px;margin:0;color:#fff;font-weight:650}.topbar .eyebrow{display:none}.topbar .subtle{color:#d6e4ef;font-size:12px}.top-actions .btn{background:#4f6478;color:#fff;border-color:#60758a;border-radius:3px;padding:7px 10px;font-size:12px}.top-actions .btn.primary{background:#0a6ed1;border-color:#0a6ed1}.sidebar{position:sticky;top:0;z-index:11;width:100%;height:auto;bottom:auto;left:auto;padding:0 16px;background:#354a5f;color:#fff;display:flex;flex-direction:row;gap:0;overflow:auto;border-bottom:1px solid #223548}.sidebar:before{content:'假SAP';display:flex;align-items:center;justify-content:center;width:70px;margin:8px 14px 8px 0;border:1px solid #d6e4ef;border-radius:3px;color:#fff;font-size:22px;font-weight:900;font-style:italic;letter-spacing:-1px;background:#0a6ed1}.nav-btn{border:0;border-bottom:3px solid transparent;border-radius:0;background:transparent;color:#fff;padding:15px 14px;font-size:14px;font-weight:600;white-space:nowrap}.nav-btn:hover{background:#2d4256;border-color:#7fb7e7}.nav-btn.active{background:#2d4256;color:#fff;border-bottom-color:#91c8f6}.main{margin-left:0;padding:18px 20px 56px}.view-title{padding:0 0 10px;margin-bottom:12px;border-bottom:1px solid var(--line)}.view-title h2{font-size:20px;font-weight:500;color:#1d2d3a}.view-title p,.hint,.subtle{font-size:12px}.card,.stat,.record-card,.project-card,.sample-card,.attachment-card,.timeline,.calendar-month-card{border-radius:4px;box-shadow:var(--shadow);border-color:#d4dde3}.card{padding:14px;margin-bottom:12px}.btn,.flow-step,.mini,.tab,.mini-line,.cal-event,.settings-tab{border-radius:3px;padding:7px 11px;font-size:12px;font-weight:600;background:#fff;border-color:#b8c6d1;color:#1d2d3a}.btn:hover,.mini:hover,.settings-tab:hover{background:#ebf5fe;border-color:#0a6ed1}.btn.primary{background:#0a6ed1;border-color:#0a6ed1;color:#fff}.settings-tab.active{background:#0a6ed1;border-color:#0a6ed1;color:#fff}.danger-light{background:#fff3f3;border-color:#ffb8b8;color:#bb0000}input,select,textarea{border-radius:3px;padding:8px 9px;border-color:#b8c6d1;background:#fff;font-size:13px}label{font-size:12px;color:#354a5f;font-weight:600}.stat{padding:12px}.stat strong{font-size:24px}.stat span,.stat em{font-size:11px}.pill,.badge{border-radius:3px;padding:3px 6px;font-size:11px;background:#e5f2ff;color:#0854a0}.field-table th,.compact-table th{background:#f2f4f5;color:#354a5f;font-weight:700}.field-table th,.field-table td{padding:8px}.record-card,.project-card{padding:12px}.record-card h4,.project-card h3{font-size:16px}.record-card p,.project-record-line p,.modal-note{font-size:13px;line-height:1.55}.record-meta,.next-line{font-size:11px}.project-schedule-summary,.time-body,.flow-step,.stage-row,.master-item,.hint,.project-info-box,.timeline-project-status{background:#f7f9fa;border-color:#d4dde3;border-radius:4px}.master-list{gap:6px}.mini-select{font-size:12px;border-radius:3px;padding:6px 8px}.calendar-grid{gap:4px}.cal-head{font-size:12px;padding:6px;color:#354a5f}.cal-cell{border-radius:3px;min-height:104px;padding:6px}.calendar-month-card h3{font-size:18px;color:#1d2d3a}.cal-event-row,.two-line-event{border-radius:3px;background:#f7f9fa}.cal-mini,.month-cell-btn,.clear-date-btn{border-radius:3px;font-size:11px}.month-cell-btn{background:#ebf5fe;color:#0854a0;border-color:#91c8f6}.modal-card{border-radius:4px}.toast,.note-box,.debug-box pre{border-radius:4px;background:#1d2d3a}.auth-box{border-radius:4px;background:#f7f9fa}.debug-box{border-radius:4px}@media(max-width:1100px){.sidebar{position:static}.topbar{position:static}.main{padding:14px}}
+.schedule-node-add-row{display:grid;grid-template-columns:2fr 1.2fr .8fr auto;gap:8px;align-items:end;margin:10px 0 12px;padding:10px;border:1px solid var(--line);background:#f7f9fb;border-radius:4px}.schedule-node-add-row input,.table-text-input,.table-number-input{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:3px;padding:5px 6px;font-size:12px;background:#fff}.table-number-input{max-width:76px}.editable-schedule-table td{vertical-align:top}.editable-schedule-table .node-actions{display:flex;gap:4px;flex-wrap:wrap}.editable-schedule-table .node-actions .mini{padding:4px 6px}@media(max-width:860px){.schedule-node-add-row{grid-template-columns:1fr}.table-number-input{max-width:none}}
+
+/* v38：專案時程與預設時程節點輸入框寬度調整 */
+.editable-schedule-table [data-project-node-dept]{width:50%;max-width:88px;min-width:68px}.editable-schedule-table .schedule-date-control .table-date-input{width:100px;min-width:96px;max-width:96px;padding-left:5px;padding-right:5px}.editable-schedule-table .schedule-date-control{gap:0}.schedule-node-add-row [data-project-node-new-dept]{width:50%;max-width:88px;min-width:68px}.schedule-node-add-row [data-project-node-new-days]{max-width:64px}.schedule-node-add-row [data-project-node-new-name]{max-width:240px}.schedule-node-add-row input{min-width:0}#nodeName,#nodeDept,#nodeDays{width:33%;max-width:180px;min-width:90px}#nodeDays{max-width:90px;min-width:64px}@media(max-width:860px){.editable-schedule-table [data-project-node-dept],.editable-schedule-table .schedule-date-control .table-date-input,.schedule-node-add-row [data-project-node-new-dept],.schedule-node-add-row [data-project-node-new-name],#nodeName,#nodeDept,#nodeDays{width:100%;max-width:none}}
+
+
+/* v42：產品新增列、全系統日期元件一致 */
+.product-create-fields{
+  grid-template-columns:minmax(150px,1.1fr) minmax(180px,1.4fr) minmax(120px,.85fr) minmax(120px,.85fr) auto !important;
+  align-items:end;
+}
+.product-create-action{display:flex;align-items:flex-end;height:100%}
+.product-create-action .btn{white-space:nowrap;height:34px}
+
+/* 日期欄位統一為剛好完整顯示日期及原生日期按鈕的寬度 */
+input[type="date"],
+.editable-schedule-table .schedule-date-control .table-date-input{
+  box-sizing:border-box;
+  width:132px !important;
+  min-width:132px !important;
+  max-width:132px !important;
+}
+
+@media(max-width:1000px){
+  .product-create-fields{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+  .product-create-action{align-items:flex-end}
+}
+@media(max-width:620px){
+  .product-create-fields{grid-template-columns:1fr !important}
+  .product-create-action .btn{width:100%}
+  input[type="date"],
+  .editable-schedule-table .schedule-date-control .table-date-input{
+    width:100% !important;
+    min-width:0 !important;
+    max-width:none !important;
+  }
+}
+
+/* v44：專案上市時程版面緊湊化 */
+.schedule-header-row{
+  display:flex;
+  align-items:flex-end;
+  justify-content:flex-start;
+  gap:10px;
+  flex-wrap:nowrap;
+  margin-bottom:10px;
+}
+.schedule-header-row > label{flex:0 0 auto}
+.schedule-mode-field select{
+  width:calc(18em + 20px) !important;
+  min-width:0 !important;
+  max-width:none !important;
+}
+input[type="date"],
+.editable-schedule-table .schedule-date-control .table-date-input{
+  width:110px !important;
+  min-width:110px !important;
+  max-width:110px !important;
+}
+.schedule-node-add-row.schedule-node-add-row-no-dept{
+  display:flex;
+  align-items:stretch;
+  justify-content:flex-start;
+  gap:0;
+  flex-wrap:nowrap;
+}
+.schedule-node-add-row.schedule-node-add-row-no-dept [data-project-node-new-name]{
+  width:265px;
+  max-width:265px;
+  min-width:180px;
+  border-top-right-radius:0;
+  border-bottom-right-radius:0;
+}
+.schedule-node-add-row.schedule-node-add-row-no-dept [data-project-node-new-days]{
+  width:70px;
+  max-width:70px;
+  min-width:70px;
+  border-radius:0;
+  border-left:0;
+}
+.schedule-node-add-row.schedule-node-add-row-no-dept [data-project-node-add]{
+  white-space:nowrap;
+  border-top-left-radius:0;
+  border-bottom-left-radius:0;
+  margin:0;
+}
+@media(max-width:760px){
+  .schedule-header-row{flex-wrap:wrap}
+  .schedule-node-add-row.schedule-node-add-row-no-dept{flex-wrap:wrap;gap:6px}
+  .schedule-node-add-row.schedule-node-add-row-no-dept [data-project-node-new-name],
+  .schedule-node-add-row.schedule-node-add-row-no-dept [data-project-node-new-days],
+  .schedule-node-add-row.schedule-node-add-row-no-dept [data-project-node-add]{
+    width:100%;max-width:none;min-width:0;border:1px solid var(--line);border-radius:3px;
+  }
+}
+
+/* v46：恢復 v41 多列表格／清單滑鼠目前列明顯化 */
+.field-table tbody tr,
+.compact-table tbody tr,
+.editable-schedule-table tbody tr,
+.record-card,
+.master-item,
+.project-record-line,
+.mini-line,
+.stage-row,
+.sample-card,
+.attachment-card {
+  position: relative;
+  transition: background-color .14s ease, box-shadow .14s ease, border-color .14s ease, transform .14s ease;
+}
+
+.field-table tbody tr:hover,
+.compact-table tbody tr:hover,
+.editable-schedule-table tbody tr:hover {
+  background: #eaf4fc;
+  box-shadow: inset 4px 0 0 #0a6ed1, 0 2px 8px rgba(10,110,209,.12);
+}
+
+.field-table tbody tr:hover td,
+.compact-table tbody tr:hover td,
+.editable-schedule-table tbody tr:hover td {
+  background: transparent;
+}
+
+.record-card:hover,
+.master-item:hover,
+.project-record-line:hover,
+.mini-line:hover,
+.stage-row:hover,
+.sample-card:hover,
+.attachment-card:hover {
+  background: #eaf4fc;
+  border-color: #91c8f6;
+  box-shadow: inset 4px 0 0 #0a6ed1, 0 2px 8px rgba(10,110,209,.14);
+}
+
+/* 保留列內輸入框與按鈕原本底色，避免 hover 時辨識度下降 */
+.field-table tbody tr:hover input,
+.field-table tbody tr:hover select,
+.field-table tbody tr:hover textarea,
+.compact-table tbody tr:hover input,
+.compact-table tbody tr:hover select,
+.compact-table tbody tr:hover textarea,
+.editable-schedule-table tbody tr:hover input,
+.editable-schedule-table tbody tr:hover select,
+.editable-schedule-table tbody tr:hover textarea {
+  background: #fff;
+}

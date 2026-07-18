@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>工作記錄｜v41 介面調整版</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">工作記事 Excel → 專案工作記錄 v27 RLS Select Fix 版</p>
+      <h1>工作記錄</h1>
+      
+    </div>
+    <div class="top-actions">
+      <button id="importExcelBtn" class="btn primary">匯入 Excel 資料</button>
+    </div>
+  </header>
+
+  <aside class="sidebar" aria-label="主要功能選單">
+    <button class="nav-btn active" data-view="dashboard">首頁總覽</button>
+    <button class="nav-btn" data-view="settings">設定</button>
+    <button class="nav-btn" data-view="log">快速記錄</button>
+    <button class="nav-btn" data-view="projects">專案總覽</button>
+    <button class="nav-btn" data-view="timeline">歷程時間軸</button>
+    <button class="nav-btn" data-view="calendar">月曆 / 日期清單</button>
+    <button class="nav-btn" data-view="samples">樣品版本</button>
+    <button class="nav-btn" data-view="attachments">照片 / 附件</button>
+  </aside>
+
+  <main class="main">
+    <section id="dashboard" class="view active">
+      <div class="view-title">
+        <div>
+          <h2>首頁總覽</h2>
+        </div>
+      </div>
+      <div id="statsGrid" class="stats-grid"></div>
+      <div class="grid two">
+        <section class="card">
+          <h3>已設定上市時程</h3>
+          <div id="todayFollowups" class="compact-list"></div>
+        </section>
+        <section class="card">
+          <h3>最近更新</h3>
+          <div id="recentRecords" class="compact-list"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="settings" class="view">
+      <div class="view-title">
+        <div>
+          <h2>設定</h2>
+        </div>
+      </div>
+
+      <div class="settings-tabs">
+        <button class="settings-tab active" data-settings-tab="customers" type="button">客戶名稱</button>
+        <button class="settings-tab" data-settings-tab="products" type="button">產品口味＋規格＋狀態</button>
+        <button class="settings-tab" data-settings-tab="schedule" type="button">上市時程節點</button>
+        <button class="settings-tab" data-settings-tab="rules" type="button">主檔整理方式</button>
+        <button class="settings-tab" data-settings-tab="supabase" type="button">Supabase 連線</button>
+      </div>
+
+      <section class="card settings-panel active" data-settings-panel="customers">
+        <h3>設定客戶名稱</h3>
+        <div class="inline-form">
+          <input id="newCustomerName" placeholder="例：JFC、全家、內部、星巴克" />
+          <button id="addCustomerBtn" class="btn primary" type="button">新增客戶</button>
+        </div>
+        <div id="customerMasterList" class="master-list"></div>
+      </section>
+
+      <section class="card settings-panel" data-settings-panel="products">
+        <h3>設定客戶的產品口味 / 規格 / 狀態 / 上市時程</h3>
+        <div class="grid four product-create-fields">
+          <label>客戶
+            <select id="masterCustomerSelect"></select>
+          </label>
+          <label>產品口味
+            <input id="newProductName" placeholder="例：米花-焦糖、米片-明太子" />
+          </label>
+          <label>規格
+            <input id="newProductSpec" placeholder="例：80g、35g、組合包" />
+          </label>
+          <label>狀態
+            <select id="newProductStatus">
+              <option>進行中</option><option>待處理</option><option>等待回覆</option><option>已完成</option><option>暫停</option><option>突然結案</option><option>已結案</option>
+            </select>
+          </label>
+          <div class="product-create-action">
+            <button id="addProductSpecBtn" class="btn primary" type="button">新增產品口味＋規格</button>
+          </div>
+        </div>
+        <div id="productSpecMasterList" class="master-list"></div>
+      </section>
+
+      <section class="card settings-panel" data-settings-panel="schedule">
+        <h3>設定專案時程節點</h3>
+        <div class="grid two schedule-master-create-fields">
+          <label>工作項目 / 節點<input id="newScheduleNodeName" placeholder="例：包裝審核申請" /></label>
+          <label>工作日數<input id="newScheduleWorkDays" type="number" min="0" placeholder="例：3" /></label>
+        </div>
+        <div class="form-actions">
+          <button id="addScheduleNodeBtn" class="btn primary" type="button">新增時程節點</button>
+          <button id="resetScheduleNodesBtn" class="btn" type="button">恢復預設節點</button>
+        </div>
+        <div id="scheduleNodeMasterList" class="master-list"></div>
+      </section>
+
+      <section class="card settings-panel" data-settings-panel="rules">
+        <h3>目前主檔整理方式</h3>
+        <table class="field-table">
+          <thead><tr><th>層級</th><th>用途</th><th>快速記錄時的行為</th></tr></thead>
+          <tbody>
+            <tr><td>客戶名稱</td><td>先選擇是哪個客戶或內部案</td><td>選完後，產品口味＋規格選單會只顯示該客戶的項目</td></tr>
+            <tr><td>產品口味＋規格</td><td>記錄產品或口味名稱與 80g、35g、組合包等規格</td><td>合併成一個選項，避免產品和規格拆開選錯</td></tr>
+            <tr><td>狀態</td><td>設定該客戶產品規格目前狀態</td><td>快速記錄不需再填狀態，新增記錄時自動帶入</td></tr>
+            <tr><td>上市時程節點</td><td>設定大方向流程與工作日數</td><td>在「產品口味＋規格＋狀態」中設定專案時程，可填開始執行日、推估完成日、實際完成日</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card settings-panel" data-settings-panel="supabase">
+        <h3>Supabase v24 專案工作記錄權限</h3>
+        <div class="auth-box">
+          <h4>登入帳號</h4>
+          <p id="authStatus" class="hint">尚未登入</p>
+          <div class="grid two">
+            <label>Email
+              <input id="authEmail" type="email" placeholder="你的 Email" autocomplete="email" />
+            </label>
+            <label>密碼
+              <input id="authPassword" type="password" placeholder="至少 6 碼" autocomplete="current-password" />
+            </label>
+          </div>
+          <div class="form-actions">
+            <button id="authSignInBtn" class="btn primary" type="button">登入</button>
+            <button id="authSignUpBtn" class="btn" type="button">建立帳號</button>
+            <button id="authForgotPasswordBtn" class="btn" type="button">忘記密碼／寄送重設信</button>
+            <button id="authSignOutBtn" class="btn danger-light" type="button">登出</button>
+          </div>
+          <p class="hint">忘記密碼時，先輸入 Email，再按「忘記密碼／寄送重設信」。請到信箱點開連結後回到本頁設定新密碼。</p>
+        </div>
+        <div id="passwordRecoveryBox" class="auth-box" hidden>
+          <h4>設定新密碼</h4>
+          <p class="hint">已由密碼重設信進入。請輸入新的登入密碼。</p>
+          <div class="grid two">
+            <label>新密碼
+              <input id="newAuthPassword" type="password" placeholder="至少 8 碼" autocomplete="new-password" />
+            </label>
+            <label>再次輸入新密碼
+              <input id="confirmAuthPassword" type="password" placeholder="請再次輸入" autocomplete="new-password" />
+            </label>
+          </div>
+          <div class="form-actions">
+            <button id="authUpdatePasswordBtn" class="btn primary" type="button">更新密碼</button>
+            <button id="authCancelRecoveryBtn" class="btn" type="button">取消</button>
+          </div>
+        </div>
+        <div id="supabaseStatus" class="note-box">尚未檢查連線。</div>
+        <details id="supabaseDebugWrap" class="debug-box">
+          <summary>Supabase 詳細錯誤訊息（Debug）</summary>
+          <pre id="supabaseDebugText">尚無錯誤。</pre>
+        </details>
+        <div class="form-actions">
+          <button id="pushSupabaseBtn" class="btn" type="button">立即同步到 Supabase</button>
+          <button id="pullSupabaseBtn" class="btn" type="button">從 Supabase 載入資料</button>
+          <button id="loadAuditBtn" class="btn" type="button">查看最近操作紀錄</button>
+        </div>
+        <div id="auditLogList" class="compact-list"></div>
+      </section>
+    </section>
+
+    <section id="log" class="view">
+      <div class="view-title">
+        <div>
+          <h2>快速記錄</h2>
+        </div>
+        <button id="newRecordBtn" class="btn primary">新增空白記錄</button>
+      </div>
+      <div class="grid form-and-list">
+        <section class="card">
+          <h3 id="formTitle">新增 / 編輯工作記錄</h3>
+          <form id="recordForm" class="record-form">
+            <input type="hidden" id="recordId" />
+            <div class="grid one">
+              <label>日期<input id="recordDate" type="date" required /></label>
+            </div>
+            <div class="grid two">
+              <label>客戶
+                <select id="customer" required></select>
+              </label>
+              <label>產品口味＋規格
+                <input id="productSpecCombo" list="productSpecList" placeholder="先選客戶，再輸入關鍵字搜尋產品口味＋規格" required />
+              </label>
+            </div>
+            <input type="hidden" id="productName" />
+            <input type="hidden" id="spec" />
+            <datalist id="productSpecList"></datalist>
+            <div class="grid one">
+              <label>工作類型
+                <select id="workType">
+                  <option>一般記事</option><option>樣品</option><option>送驗/報告</option><option>包裝審查</option><option>設計/版面</option><option>料號/條碼</option><option>成分營養標</option><option>請購/發包</option><option>試俥/生產</option><option>出貨/上市</option><option>會議/討論</option><option>其他</option>
+                </select>
+              </label>
+            </div>
+            <label>記事內容<textarea id="notes" rows="6" required placeholder="誰回覆、目前進度、已完成什麼、卡在哪裡..."></textarea></label>
+            <div class="grid two">
+              <label>樣品版本<input id="sampleVersion" placeholder="例：V1、V2、2026-06-A" /></label>
+              <label>照片 / 附件位置<input id="photoPath" placeholder="例：雲端連結或 assets/photos/a.jpg" /></label>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn primary">儲存記錄</button>
+              <button type="button" id="duplicateBtn" class="btn">複製成新記錄</button>
+              <button type="button" id="resetBtn" class="btn">清空</button>
+            </div>
+          </form>
+        </section>
+        <section class="card">
+          <div class="list-head">
+            <h3>工作記事清單</h3>
+            <span id="recordCount" class="pill"></span>
+          </div>
+          <div class="filters">
+            <input id="keyword" type="search" placeholder="關鍵字：客戶、產品、記事、下一步..." />
+            <select id="customerFilter"><option value="">全部客戶</option></select>
+            <select id="statusFilter"><option value="">全部狀態</option></select>
+            <select id="typeFilter"><option value="">全部類型</option></select>
+          </div>
+          <div id="recordsList" class="records-list"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="projects" class="view">
+      <div class="view-title"><div><h2>專案總覽</h2><p>把同一個「客戶 + 產品/口味 + 規格」合併成一張專案卡。</p></div></div>
+      <section class="card">
+        <label>查詢條件：客戶＋產品/口味＋規格
+          <input id="projectSearch" type="search" placeholder="例：JFC 焦糖 80g、全家 米片、內部 組合包" />
+        </label>
+      </section>
+      <div id="projectBoard" class="project-board"></div>
+    </section>
+
+    <section id="timeline" class="view">
+      <div class="view-title"><div><h2>歷程時間軸</h2><p>適合查某個案子從開始到現在所有紀錄。</p></div></div>
+      <div class="filters line">
+        <select id="timelineProjectSelect"></select>
+      </div>
+      <div id="timelineList" class="timeline"></div>
+    </section>
+
+    <section id="followups" class="view">
+      <div class="view-title"><div><h2>追蹤提醒</h2><p>看今天、本週、逾期、等待他人的事項。</p></div></div>
+      <div class="tabs"><button class="tab active" data-follow="overdue">逾期</button><button class="tab" data-follow="today">今天</button><button class="tab" data-follow="week">本週</button><button class="tab" data-follow="waiting">等待他人</button><button class="tab" data-follow="all">全部未完成</button></div>
+      <div id="followupList" class="records-list"></div>
+    </section>
+
+    <section id="calendar" class="view">
+      <div class="view-title">
+        <div><h2>月曆 / 日期清單</h2></div>
+        <div class="calendar-controls">
+          <label>起始月份<input id="calendarMonth" type="month" /></label>
+        </div>
+      </div>
+      <div id="calendarGrid" class="calendar-multi"></div>
+      <section class="card"><h3>日期清單</h3><div id="dateAgenda" class="compact-list"></div></section>
+    </section>
+
+    <section id="samples" class="view">
+      <div class="view-title"><div><h2>樣品版本</h2></div></div>
+      <div id="sampleList" class="sample-grid"></div>
+    </section>
+
+    <section id="attachments" class="view">
+      <div class="view-title"><div><h2>照片 / 附件</h2></div></div>
+      <div id="attachmentList" class="attachment-grid"></div>
+    </section>
+
+  </main>
+
+  <div id="recordModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="recordModalTitle">
+      <div class="modal-head">
+        <h3 id="recordModalTitle">查看記事</h3>
+        <button id="recordModalClose" class="mini" type="button">關閉</button>
+      </div>
+      <div id="recordModalBody" class="modal-body"></div>
+    </div>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="data/excelRecords.js"></script>
+  <script src="js/config/supabaseConfig.js"></script>
+  <script src="js/config/projectInfoTemplate.js"></script>
+  <script src="js/services/supabaseService.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
