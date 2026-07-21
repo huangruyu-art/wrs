@@ -448,11 +448,29 @@
 
   async function loadGanttData() {
     if (!isAuthenticated()) throw new Error('請先回首頁登入 Supabase，再開啟甘特式時間軸。');
-    const [productSpecs, projectSchedules] = await Promise.all([
+    const [productSpecs, projectSchedules, projectScheduleNodes] = await Promise.all([
       select('product_specs', 'select=*&deleted_at=is.null&order=customer.asc,product_name.asc,spec.asc'),
-      select('project_schedules', 'select=*&deleted_at=is.null')
+      select('project_schedules', 'select=*&deleted_at=is.null'),
+      select('project_schedule_nodes', 'select=*&deleted_at=is.null&order=sort_order.asc')
     ]);
-    return { productSpecs: productSpecs || [], projectSchedules: projectSchedules || [] };
+    return { productSpecs: productSpecs || [], projectSchedules: projectSchedules || [], projectScheduleNodes: projectScheduleNodes || [] };
+  }
+
+  async function updateProjectScheduleDates(projectKey, config, nodeUpdates) {
+    if (!projectKey) throw new Error('缺少專案識別資料。');
+    await patchWhere('project_schedules', 'project_key', projectKey, Object.assign(sharedAuditFields(), {
+      config,
+      planned_start_date: nodeUpdates.map(x => x.planned_start_date).filter(Boolean).sort()[0] || null,
+      planned_end_date: nodeUpdates.map(x => x.planned_end_date).filter(Boolean).sort().slice(-1)[0] || null,
+      updated_at: new Date().toISOString()
+    }));
+    if (nodeUpdates && nodeUpdates.length) {
+      await upsert('project_schedule_nodes', nodeUpdates.map((x, i) => Object.assign(sharedAuditFields(), {
+        project_key: projectKey, node_id: x.node_id, sort_order: i + 1,
+        planned_start_date: x.planned_start_date || null, planned_end_date: x.planned_end_date || null,
+        updated_at: new Date().toISOString(), deleted_at: null
+      })), 'project_key,node_id');
+    }
   }
 
   async function updateProjectScheduleConfig(projectKey, config) {
@@ -467,5 +485,5 @@
     return select('audit_logs', `select=*&order=created_at.desc&limit=${Number(limit || 50)}`);
   }
 
-  window.WR_SUPABASE_SERVICE = { getConfig, isReady, getSession, getUser, isAuthenticated, getLastDebug, refreshSession, ensureFreshSession, signUp, signIn, requestPasswordReset, consumePasswordRecoveryFromUrl, updatePassword, signOut, testConnection, pushAll, pullAll, loadGanttData, updateProjectScheduleConfig, softDeleteByColumn, softDeleteAllOwned, listAuditLogs };
+  window.WR_SUPABASE_SERVICE = { getConfig, isReady, getSession, getUser, isAuthenticated, getLastDebug, refreshSession, ensureFreshSession, signUp, signIn, requestPasswordReset, consumePasswordRecoveryFromUrl, updatePassword, signOut, testConnection, pushAll, pullAll, loadGanttData, updateProjectScheduleDates, updateProjectScheduleConfig, softDeleteByColumn, softDeleteAllOwned, listAuditLogs };
 })();
