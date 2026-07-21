@@ -445,9 +445,27 @@
     };
   }
 
+
+  async function loadGanttData() {
+    if (!isAuthenticated()) throw new Error('請先回首頁登入 Supabase，再開啟甘特式時間軸。');
+    const [productSpecs, projectSchedules] = await Promise.all([
+      select('product_specs', 'select=*&deleted_at=is.null&order=customer.asc,product_name.asc,spec.asc'),
+      select('project_schedules', 'select=*&deleted_at=is.null')
+    ]);
+    return { productSpecs: productSpecs || [], projectSchedules: projectSchedules || [] };
+  }
+
+  async function updateProjectScheduleConfig(projectKey, config) {
+    if (!projectKey) throw new Error('缺少專案識別資料。');
+    return patchWhere('project_schedules', 'project_key', projectKey, Object.assign(sharedAuditFields(), {
+      config,
+      updated_at: new Date().toISOString()
+    }));
+  }
+
   async function listAuditLogs(limit) {
     return select('audit_logs', `select=*&order=created_at.desc&limit=${Number(limit || 50)}`);
   }
 
-  window.WR_SUPABASE_SERVICE = { getConfig, isReady, getSession, getUser, isAuthenticated, getLastDebug, refreshSession, ensureFreshSession, signUp, signIn, requestPasswordReset, consumePasswordRecoveryFromUrl, updatePassword, signOut, testConnection, pushAll, pullAll, softDeleteByColumn, softDeleteAllOwned, listAuditLogs };
+  window.WR_SUPABASE_SERVICE = { getConfig, isReady, getSession, getUser, isAuthenticated, getLastDebug, refreshSession, ensureFreshSession, signUp, signIn, requestPasswordReset, consumePasswordRecoveryFromUrl, updatePassword, signOut, testConnection, pushAll, pullAll, loadGanttData, updateProjectScheduleConfig, softDeleteByColumn, softDeleteAllOwned, listAuditLogs };
 })();

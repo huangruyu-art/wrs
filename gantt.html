@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>跨專案甘特式時間軸｜Version 1.1.0</title>
+  <link rel="stylesheet" href="css/gantt.css" />
+</head>
+<body>
+  <header class="gantt-topbar">
+    <div>
+      <h1>跨專案甘特式時間軸</h1>
+      <p>查看同期專案與上市時程節點；拖曳後確認才會儲存。</p>
+    </div>
+    <a class="home-link" href="index.html">回工作記錄首頁</a>
+  </header>
+
+  <main class="gantt-page">
+    <section class="filters" aria-label="甘特圖篩選條件">
+      <label>日期起日<input id="filterStart" type="date" /></label>
+      <label>日期迄日<input id="filterEnd" type="date" /></label>
+      <label>客戶<select id="filterCustomer"><option value="">全部客戶</option></select></label>
+      <label>專案狀態<select id="filterStatus"><option value="">全部狀態</option></select></label>
+      <label>檢視模式
+        <select id="viewMode">
+          <option value="nodes">節點展開檢視</option>
+          <option value="projects">專案期間檢視</option>
+          <option value="production">只看生產相關節點</option>
+        </select>
+      </label>
+      <label>時間刻度
+        <select id="scaleMode"><option value="day">日</option><option value="week">週</option></select>
+      </label>
+      <label class="keyword-field">關鍵字<input id="filterKeyword" type="search" placeholder="客戶、口味、規格、節點" /></label>
+      <button id="reloadBtn" type="button">重新載入</button>
+    </section>
+
+    <section id="statusBanner" class="status-banner" aria-live="polite"></section>
+
+    <section class="gantt-shell">
+      <div id="ganttEmpty" class="empty-state" hidden>目前沒有符合條件、且已設定日期的專案節點。</div>
+      <div id="ganttScroller" class="gantt-scroller">
+        <div id="ganttCanvas" class="gantt-canvas"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="confirmModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <h2 id="confirmTitle">確認時程變更</h2>
+      <div id="changeSummary" class="change-summary"></div>
+      <fieldset>
+        <legend>套用方式</legend>
+        <label><input type="radio" name="applyMode" value="single" checked /> 只修改本節點</label>
+        <label><input type="radio" name="applyMode" value="following" /> 本節點及後續節點一起順延</label>
+      </fieldset>
+      <div id="conflictMessage" class="conflict-message" hidden></div>
+      <div class="modal-actions">
+        <button id="cancelChangeBtn" type="button">取消</button>
+        <button id="saveChangeBtn" class="primary" type="button">確認儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/config/supabaseConfig.js"></script>
+  <script src="js/services/supabaseService.js"></script>
+  <script src="js/modules/ganttPage.js"></script>
+</body>
+</html>

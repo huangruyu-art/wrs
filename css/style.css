@@ -227,3 +227,5 @@ input[type="date"],
 .editable-schedule-table tbody tr:hover textarea {
   background: #fff;
 }
+
+.nav-link{display:block;text-decoration:none;text-align:center;color:inherit}
