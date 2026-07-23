@@ -1,22 +1,282 @@
-(function(){
-'use strict';const STORAGE_KEY='work-record-prototype-v9-project-schedules',PRODUCT_KEY='work-record-prototype-v9-masters',DAY=86400000,$=id=>document.getElementById(id);
-const zooms=[{label:'日',cell:34,step:1},{label:'2日',cell:22,step:1},{label:'週',cell:12,step:1},{label:'月',cell:5,step:1},{label:'季',cell:2.2,step:1},{label:'半年',cell:1.2,step:1},{label:'年',cell:.65,step:1}];
-const state={products:[],schedules:{},dbNodes:[],rows:[],pending:null,source:'local',zoom:0,collapsed:new Set()};
-function iso(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`} function parseDate(v){if(!v)return null;const m=String(v).match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!m)return null;const d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));return Number.isNaN(d.getTime())?null:d} function addDays(v,n){const d=parseDate(v);if(!d)return v;d.setDate(d.getDate()+n);return iso(d)} function diffDays(a,b){return Math.round((parseDate(b)-parseDate(a))/DAY)} function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))} function banner(m,t=''){const e=$('statusBanner');e.textContent=m;e.className='status-banner '+t} function parts(k){const [customer='',product='',spec='']=String(k).split('｜');return{customer,product,spec}} function production(n){return /生產|試產|排產/.test(n||'')} function statusFor(k){return state.products.find(p=>[p.customer||'',p.product_name||'',p.spec||''].join('｜')===k)?.status||'進行中'}
-function legacyDates(c,n){const d=(c.nodeDates||{})[n.id]||{};const plannedEnd=d.planned_end_date||d.planned_date||'',plannedStart=d.planned_start_date||d.start_date||plannedEnd||'',actualEnd=d.actual_end_date||d.actual_date||'',actualStart=d.actual_start_date||'';return{plannedStart,plannedEnd,actualStart,actualEnd,start:plannedStart||actualStart||actualEnd,end:plannedEnd||plannedStart||actualEnd||actualStart}}
-async function load(){banner('', '');const svc=window.WR_SUPABASE_SERVICE;if(svc?.isReady()&&svc.isAuthenticated()){const d=await svc.loadGanttData();state.source='supabase';state.products=d.productSpecs||[];state.dbNodes=d.projectScheduleNodes||[];state.schedules={};(d.projectSchedules||[]).forEach(r=>state.schedules[r.project_key]=r.config||{})}else{state.source='local';const m=JSON.parse(localStorage.getItem(PRODUCT_KEY)||'{"productSpecs":[]}');state.products=m.productSpecs||[];state.schedules=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');state.dbNodes=[]}buildRows();populate();defaults();render();banner('', '')}
-function buildRows(){state.rows=[];Object.entries(state.schedules).forEach(([key,c])=>{const p=parts(key),nodes=(c.scheduleNodes||[]).slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));nodes.forEach((n,i)=>{const local=legacyDates(c,n),db=state.dbNodes.find(x=>x.project_key===key&&x.node_id===n.id);const d=(local.start||local.end)?local:(db?{plannedStart:db.planned_start_date||'',plannedEnd:db.planned_end_date||'',actualStart:db.actual_start_date||'',actualEnd:db.actual_end_date||'',start:db.planned_start_date||db.actual_start_date||db.actual_end_date||db.planned_end_date,end:db.planned_end_date||db.planned_start_date||db.actual_end_date||db.actual_start_date}:local);if(!d.start&&!d.end)return;state.rows.push({id:n.id,key,customer:p.customer,product:p.product,spec:p.spec,nodeName:n.node_name||'',order:i+1,start:d.start,end:d.end,plannedStart:d.plannedStart||'',plannedEnd:d.plannedEnd||'',actualStart:d.actualStart||'',actualEnd:d.actualEnd||'',actual:d.actualEnd||'',status:statusFor(key),production:production(n.node_name),config:c})})})}
-function populate(){const c=[...new Set(state.products.map(p=>p.customer).filter(Boolean))].sort();$('filterCustomer').innerHTML='<option value="">全部客戶</option>'+c.map(x=>`<option>${esc(x)}</option>`).join('');const s=[...new Set(state.products.map(p=>p.status||'進行中'))].sort();$('filterStatus').innerHTML='<option value="">全部狀態</option>'+s.map(x=>`<option>${esc(x)}</option>`).join('')}
-function defaults(){if($('filterStart').value)return;const ds=state.rows.flatMap(r=>[r.start,r.end]).filter(Boolean).sort(),n=new Date();$('filterStart').value=ds[0]||iso(new Date(n.getFullYear(),n.getMonth(),1));$('filterEnd').value=ds.at(-1)||iso(new Date(n.getFullYear(),n.getMonth()+2,0))}
-function filtered(){const s=$('filterStart').value,e=$('filterEnd').value,c=$('filterCustomer').value,st=$('filterStatus').value,q=$('filterKeyword').value.trim().toLowerCase(),m=$('viewMode').value;return state.rows.filter(r=>(!s||r.end>=s)&&(!e||r.start<=e)&&(!c||r.customer===c)&&(!st||r.status===st)&&(!q||`${r.key} ${r.nodeName}`.toLowerCase().includes(q))&&(m!=='production'||r.production))}
-function render(){const start=$('filterStart').value,end=$('filterEnd').value;if(!start||!end||start>end){banner('日期區間不正確。','error');return}const rows=filtered(),mode=$('viewMode').value,z=zooms[state.zoom],cell=z.cell;document.documentElement.style.setProperty('--g-cell',cell+'px');$('zoomLabel').textContent=z.label;const days=diffDays(start,end)+1,w=Math.max(days*cell,600),g=new Map();rows.forEach(r=>{if(!g.has(r.key))g.set(r.key,[]);g.get(r.key).push(r)});$('ganttEmpty').hidden=g.size>0;let h=`<div class="gantt-header"><div class="left-head">專案 / 節點</div><div class="timeline-head" style="width:${w}px">`;for(let i=0;i<days;i++){const d=addDays(start,i),dt=parseDate(d),show=cell>=10||dt.getDate()===1,weekend=[0,6].includes(dt.getDay());h+=`<div class="date-cell ${weekend?'weekend':''}" style="flex-basis:${cell}px">${show?`<strong>${dt.getDate()}</strong>${dt.getMonth()+1}月`:''}</div>`}h+='</div></div>';g.forEach((list,key)=>{const ps=list.map(x=>x.start).sort()[0],pe=list.map(x=>x.end).sort().at(-1),collapsed=state.collapsed.has(key);h+=rowHtml({key,start:ps,end:pe},start,cell,true,true,collapsed);if(mode!=='projects'&&!collapsed)list.forEach(r=>h+=rowHtml(r,start,cell,false,true,false))});const today=iso(new Date());if(today>=start&&today<=end)h+=`<div class="today-line" style="left:calc(var(--g-left) + ${diffDays(start,today)*cell+cell/2}px)" title="今天"></div>`;$('ganttCanvas').innerHTML=h;bindDrag(start,cell);document.querySelectorAll('[data-collapse]').forEach(e=>e.onclick=()=>{const k=e.dataset.collapse;state.collapsed.has(k)?state.collapsed.delete(k):state.collapsed.add(k);render()})}
-function rowHtml(r,rs,cell,project,show,collapsed){const left=diffDays(rs,r.start)*cell,width=Math.max(cell,(diffDays(r.start,r.end)+1)*cell),cls=project?'project-bar':`${r.actual?'completed':''} ${r.production?'production':''}`;return `<div class="gantt-row"><div class="row-label ${project?'project':''}" ${project?`data-collapse="${esc(r.key)}"`:''} title="${esc(project?r.key:r.nodeName)}">${project?`<span class="toggle">${collapsed?'▶':'▼'}</span>${esc(r.key)}`:'↳ '+esc(r.nodeName)}</div><div class="timeline-row">${show?`<div class="bar ${cls}" data-key="${esc(r.key)}" data-node="${esc(r.id||'')}" data-start="${esc(r.start)}" data-end="${esc(r.end)}" style="left:${left}px;width:${width}px" title="${esc(r.start)}～${esc(r.end)}"><i class="handle left" data-edge="left"></i><span>${esc(project?r.key:r.nodeName)}</span><i class="handle right" data-edge="right"></i></div>`:''}</div></div>`}
-function bindDrag(rs,cell){document.querySelectorAll('.bar[data-node]:not([data-node=""])').forEach(b=>b.onpointerdown=e=>{e.preventDefault();const edge=e.target.dataset.edge||'move',x=e.clientX,os=b.dataset.start,oe=b.dataset.end;b.setPointerCapture(e.pointerId);const mv=v=>{const d=Math.round((v.clientX-x)/cell);let ns=os,ne=oe;if(edge==='move'){ns=addDays(os,d);ne=addDays(oe,d)}else if(edge==='left'){ns=addDays(os,d);if(ns>ne)ns=ne}else{ne=addDays(oe,d);if(ne<ns)ne=ns}b.style.left=diffDays(rs,ns)*cell+'px';b.style.width=Math.max(cell,(diffDays(ns,ne)+1)*cell)+'px';b.dataset.ps=ns;b.dataset.pe=ne};const up=v=>{b.releasePointerCapture(v.pointerId);b.removeEventListener('pointermove',mv);b.removeEventListener('pointerup',up);const ns=b.dataset.ps||os,ne=b.dataset.pe||oe;delete b.dataset.ps;delete b.dataset.pe;if(ns===os&&ne===oe)return render();confirmChange(b.dataset.key,b.dataset.node,os,oe,ns,ne)};b.addEventListener('pointermove',mv);b.addEventListener('pointerup',up)})}
-function confirmChange(key,id,os,oe,ns,ne){const r=state.rows.find(x=>x.key===key&&x.id===id);state.pending={row:r,oldStart:os,oldEnd:oe,newStart:ns,newEnd:ne,delta:diffDays(os,ns)};$('changeSummary').innerHTML=`<b>${esc(key)}</b><br>節點：${esc(r.nodeName)}<br><br>原日期：${os}～${oe}<br>新日期：${ns}～${ne}`;const next=state.rows.filter(x=>x.key===key&&x.order>r.order).sort((a,b)=>a.order-b.order)[0],conflict=next&&ne>next.start;$('conflictMessage').hidden=!conflict;$('conflictMessage').textContent=conflict?'本次調整會與下一個節點日期衝突。建議選擇「本節點及後續節點一起順延」。':'';$('confirmModal').classList.add('open');$('confirmModal').setAttribute('aria-hidden','false')}
-function close(){state.pending=null;$('confirmModal').classList.remove('open');$('confirmModal').setAttribute('aria-hidden','true');render()}
-async function save(){const p=state.pending;if(!p)return;const mode=document.querySelector('input[name="applyMode"]:checked').value,c=structuredClone(state.schedules[p.row.key]),updates=[];(c.scheduleNodes||[]).filter(n=>n.id===p.row.id||(mode==='following'&&(n.sort_order||0)>p.row.order)).forEach(n=>{const old=state.rows.find(x=>x.key===p.row.key&&x.id===n.id),is=n.id===p.row.id,st=is?p.newStart:addDays(old.start,p.delta),en=is?p.newEnd:addDays(old.end,p.delta);c.nodeDates=c.nodeDates||{};c.nodeDates[n.id]={...(c.nodeDates[n.id]||{}),planned_start_date:st,planned_end_date:en,planned_date:en};const dates=c.nodeDates[n.id];updates.push({node_id:n.id,node_name:n.node_name||'',sort_order:Number(n.sort_order||0),planned_start_date:st,planned_end_date:en,actual_start_date:dates.actual_start_date||null,actual_end_date:dates.actual_end_date||dates.actual_date||null})});state.schedules[p.row.key]=c;$('confirmModal').classList.remove('open');try{if(state.source==='supabase')await window.WR_SUPABASE_SERVICE.updateProjectScheduleDates(p.row.key,c,updates);else localStorage.setItem(STORAGE_KEY,JSON.stringify(state.schedules));await load();banner('時程已儲存。','success')}catch(e){await load();banner('儲存失敗，已恢復原日期：'+e.message,'error')}finally{state.pending=null}}
-function zoom(n){const sc=$('ganttScroller'),center=(sc.scrollLeft+sc.clientWidth/2)/Math.max(zooms[state.zoom].cell,.01);state.zoom=Math.max(0,Math.min(zooms.length-1,state.zoom+n));render();sc.scrollLeft=Math.max(0,center*zooms[state.zoom].cell-sc.clientWidth/2)}
-function today(){const s=$('filterStart').value,t=iso(new Date()),sc=$('ganttScroller');if(t<s||t>$('filterEnd').value){$('filterStart').value=addDays(t,-30);$('filterEnd').value=addDays(t,90);render()}sc.scrollLeft=Math.max(0,diffDays($('filterStart').value,t)*zooms[state.zoom].cell-sc.clientWidth/2)}
-function fit(){const rs=filtered();if(!rs.length)return;const a=rs.map(x=>x.start).sort()[0],b=rs.map(x=>x.end).sort().at(-1);$('filterStart').value=a;$('filterEnd').value=b;const d=diffDays(a,b)+1,w=$('ganttScroller').clientWidth-parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--g-left'));let best=zooms.length-1;for(let i=0;i<zooms.length;i++)if(d*zooms[i].cell<=w){best=i;break}state.zoom=best;render();$('ganttScroller').scrollLeft=0}
-['filterStart','filterEnd','filterCustomer','filterStatus','viewMode'].forEach(id=>$(id).addEventListener('change',render));$('filterKeyword').addEventListener('input',render);$('zoomOutBtn').onclick=()=>zoom(1);$('zoomInBtn').onclick=()=>zoom(-1);$('todayBtn').onclick=today;$('fitAllBtn').onclick=fit;$('cancelChangeBtn').onclick=close;$('saveChangeBtn').onclick=save;$('ganttScroller').addEventListener('wheel',e=>{if(e.ctrlKey){e.preventDefault();zoom(e.deltaY>0?1:-1)}},{passive:false});load().catch(e=>banner(e.message,'error'));
-})();
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>工作記錄｜Version 1.1.2</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <aside data-main-menu data-page="index"></aside>
+
+  <main class="main">
+    <section id="dashboard" class="view active">
+      <div class="view-title">
+        <div>
+          <h2>首頁總覽</h2>
+        </div>
+      </div>
+      <div id="statsGrid" class="stats-grid"></div>
+      <div class="grid two">
+        <section class="card">
+          <h3>已設定上市時程</h3>
+          <div id="todayFollowups" class="compact-list"></div>
+        </section>
+        <section class="card">
+          <h3>最近更新</h3>
+          <div id="recentRecords" class="compact-list"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="settings" class="view">
+      <div class="view-title">
+        <div>
+          <h2>設定</h2>
+        </div>
+      </div>
+
+      <div class="settings-tabs">
+        <button class="settings-tab active" data-settings-tab="customers" type="button">客戶名稱</button>
+        <button class="settings-tab" data-settings-tab="products" type="button">產品口味＋規格＋狀態</button>
+        <button class="settings-tab" data-settings-tab="schedule" type="button">上市時程節點</button>
+        <button class="settings-tab" data-settings-tab="rules" type="button">主檔整理方式</button>
+        <button class="settings-tab" data-settings-tab="supabase" type="button">Supabase 連線</button>
+      </div>
+
+      <section class="card settings-panel active" data-settings-panel="customers">
+        <h3>設定客戶名稱</h3>
+        <div class="inline-form">
+          <input id="newCustomerName" placeholder="例：JFC、全家、內部、星巴克" />
+          <button id="addCustomerBtn" class="btn primary" type="button">新增客戶</button>
+        </div>
+        <div id="customerMasterList" class="master-list"></div>
+      </section>
+
+      <section class="card settings-panel" data-settings-panel="products">
+        <h3>設定客戶的產品口味 / 規格 / 狀態 / 上市時程</h3>
+        <div class="grid four product-create-fields">
+          <label>客戶
+            <select id="masterCustomerSelect"></select>
+          </label>
+          <label>產品口味
+            <input id="newProductName" placeholder="例：米花-焦糖、米片-明太子" />
+          </label>
+          <label>規格
+            <input id="newProductSpec" placeholder="例：80g、35g、組合包" />
+          </label>
+          <label>狀態
+            <select id="newProductStatus">
+              <option>進行中</option><option>待處理</option><option>等待回覆</option><option>已完成</option><option>暫停</option><option>突然結案</option><option>已結案</option>
+            </select>
+          </label>
+          <div class="product-create-action">
+            <button id="addProductSpecBtn" class="btn primary" type="button">新增產品口味＋規格</button>
+          </div>
+        </div>
+        <div id="productSpecMasterList" class="master-list"></div>
+      </section>
+
+      <section class="card settings-panel" data-settings-panel="schedule">
+        <h3>設定專案時程節點</h3>
+        <div class="grid two schedule-master-create-fields">
+          <label>工作項目 / 節點<input id="newScheduleNodeName" placeholder="例：包裝審核申請" /></label>
+          <label>工作日數<input id="newScheduleWorkDays" type="number" min="0" placeholder="例：3" /></label>
+        </div>
+        <div class="form-actions">
+          <button id="addScheduleNodeBtn" class="btn primary" type="button">新增時程節點</button>
+          <button id="resetScheduleNodesBtn" class="btn" type="button">恢復預設節點</button>
+        </div>
+        <div id="scheduleNodeMasterList" class="master-list"></div>
+      </section>
+
+      <section class="card settings-panel" data-settings-panel="rules">
+        <h3>目前主檔整理方式</h3>
+        <table class="field-table">
+          <thead><tr><th>層級</th><th>用途</th><th>快速記錄時的行為</th></tr></thead>
+          <tbody>
+            <tr><td>客戶名稱</td><td>先選擇是哪個客戶或內部案</td><td>選完後，產品口味＋規格選單會只顯示該客戶的項目</td></tr>
+            <tr><td>產品口味＋規格</td><td>記錄產品或口味名稱與 80g、35g、組合包等規格</td><td>合併成一個選項，避免產品和規格拆開選錯</td></tr>
+            <tr><td>狀態</td><td>設定該客戶產品規格目前狀態</td><td>快速記錄不需再填狀態，新增記錄時自動帶入</td></tr>
+            <tr><td>上市時程節點</td><td>設定大方向流程與工作日數</td><td>在「產品口味＋規格＋狀態」中設定專案時程，可填預計開始日、預計完成日、實際開始日、實際完成日；尚未取得預計時程時可留空</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card settings-panel" data-settings-panel="supabase">
+        <h3>Supabase v24 專案工作記錄權限</h3>
+        <div class="auth-box">
+          <h4>登入帳號</h4>
+          <p id="authStatus" class="hint">尚未登入</p>
+          <div class="grid two">
+            <label>Email
+              <input id="authEmail" type="email" placeholder="你的 Email" autocomplete="email" />
+            </label>
+            <label>密碼
+              <input id="authPassword" type="password" placeholder="至少 6 碼" autocomplete="current-password" />
+            </label>
+          </div>
+          <div class="form-actions">
+            <button id="authSignInBtn" class="btn primary" type="button">登入</button>
+            <button id="authSignUpBtn" class="btn" type="button">建立帳號</button>
+            <button id="authForgotPasswordBtn" class="btn" type="button">忘記密碼／寄送重設信</button>
+            <button id="authSignOutBtn" class="btn danger-light" type="button">登出</button>
+          </div>
+          <p class="hint">忘記密碼時，先輸入 Email，再按「忘記密碼／寄送重設信」。請到信箱點開連結後回到本頁設定新密碼。</p>
+        </div>
+        <div id="passwordRecoveryBox" class="auth-box" hidden>
+          <h4>設定新密碼</h4>
+          <p class="hint">已由密碼重設信進入。請輸入新的登入密碼。</p>
+          <div class="grid two">
+            <label>新密碼
+              <input id="newAuthPassword" type="password" placeholder="至少 8 碼" autocomplete="new-password" />
+            </label>
+            <label>再次輸入新密碼
+              <input id="confirmAuthPassword" type="password" placeholder="請再次輸入" autocomplete="new-password" />
+            </label>
+          </div>
+          <div class="form-actions">
+            <button id="authUpdatePasswordBtn" class="btn primary" type="button">更新密碼</button>
+            <button id="authCancelRecoveryBtn" class="btn" type="button">取消</button>
+          </div>
+        </div>
+        <div id="supabaseStatus" class="note-box">尚未檢查連線。</div>
+        <details id="supabaseDebugWrap" class="debug-box">
+          <summary>Supabase 詳細錯誤訊息（Debug）</summary>
+          <pre id="supabaseDebugText">尚無錯誤。</pre>
+        </details>
+        <div class="form-actions">
+          <button id="pushSupabaseBtn" class="btn" type="button">立即同步到 Supabase</button>
+          <button id="pullSupabaseBtn" class="btn" type="button">從 Supabase 載入資料</button>
+          <button id="loadAuditBtn" class="btn" type="button">查看最近操作紀錄</button>
+        </div>
+        <div id="auditLogList" class="compact-list"></div>
+      </section>
+    </section>
+
+    <section id="log" class="view">
+      <div class="view-title">
+        <div>
+          <h2>快速記錄</h2>
+        </div>
+        <button id="newRecordBtn" class="btn primary">新增空白記錄</button>
+      </div>
+      <div class="grid form-and-list">
+        <section class="card">
+          <h3 id="formTitle">新增 / 編輯工作記錄</h3>
+          <form id="recordForm" class="record-form">
+            <input type="hidden" id="recordId" />
+            <div class="grid one">
+              <label>日期<input id="recordDate" type="date" required /></label>
+            </div>
+            <div class="grid two">
+              <label>客戶
+                <select id="customer" required></select>
+              </label>
+              <label>產品口味＋規格
+                <input id="productSpecCombo" list="productSpecList" placeholder="先選客戶，再輸入關鍵字搜尋產品口味＋規格" required />
+              </label>
+            </div>
+            <input type="hidden" id="productName" />
+            <input type="hidden" id="spec" />
+            <datalist id="productSpecList"></datalist>
+            <div class="grid one">
+              <label>工作類型
+                <select id="workType">
+                  <option>一般記事</option><option>樣品</option><option>送驗/報告</option><option>包裝審查</option><option>設計/版面</option><option>料號/條碼</option><option>成分營養標</option><option>請購/發包</option><option>試俥/生產</option><option>出貨/上市</option><option>會議/討論</option><option>其他</option>
+                </select>
+              </label>
+            </div>
+            <label>記事內容<textarea id="notes" rows="6" required placeholder="誰回覆、目前進度、已完成什麼、卡在哪裡..."></textarea></label>
+            <div class="grid two">
+              <label>樣品版本<input id="sampleVersion" placeholder="例：V1、V2、2026-06-A" /></label>
+              <label>照片 / 附件位置<input id="photoPath" placeholder="例：雲端連結或 assets/photos/a.jpg" /></label>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn primary">儲存記錄</button>
+              <button type="button" id="duplicateBtn" class="btn">複製成新記錄</button>
+              <button type="button" id="resetBtn" class="btn">清空</button>
+            </div>
+          </form>
+        </section>
+        <section class="card">
+          <div class="list-head">
+            <h3>工作記事清單</h3>
+            <span id="recordCount" class="pill"></span>
+          </div>
+          <div class="filters">
+            <input id="keyword" type="search" placeholder="關鍵字：客戶、產品、記事、下一步..." />
+            <select id="customerFilter"><option value="">全部客戶</option></select>
+            <select id="statusFilter"><option value="">全部狀態</option></select>
+            <select id="typeFilter"><option value="">全部類型</option></select>
+          </div>
+          <div id="recordsList" class="records-list"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="projects" class="view">
+      <div class="view-title"><div><h2>專案總覽</h2><p>把同一個「客戶 + 產品/口味 + 規格」合併成一張專案卡。</p></div></div>
+      <section class="card">
+        <label>查詢條件：客戶＋產品/口味＋規格
+          <input id="projectSearch" type="search" placeholder="例：JFC 焦糖 80g、全家 米片、內部 組合包" />
+        </label>
+      </section>
+      <div id="projectBoard" class="project-board"></div>
+    </section>
+
+    <section id="timeline" class="view">
+      <div class="view-title"><div><h2>歷程時間軸</h2><p>適合查某個案子從開始到現在所有紀錄。</p></div></div>
+      <div class="filters line">
+        <select id="timelineProjectSelect"></select>
+      </div>
+      <div id="timelineList" class="timeline"></div>
+    </section>
+
+    <section id="followups" class="view">
+      <div class="view-title"><div><h2>追蹤提醒</h2><p>看今天、本週、逾期、等待他人的事項。</p></div></div>
+      <div class="tabs"><button class="tab active" data-follow="overdue">逾期</button><button class="tab" data-follow="today">今天</button><button class="tab" data-follow="week">本週</button><button class="tab" data-follow="waiting">等待他人</button><button class="tab" data-follow="all">全部未完成</button></div>
+      <div id="followupList" class="records-list"></div>
+    </section>
+
+    <section id="calendar" class="view">
+      <div class="view-title">
+        <div><h2>月曆 / 日期清單</h2></div>
+        <div class="calendar-controls">
+          <label>起始月份<input id="calendarMonth" type="month" /></label>
+        </div>
+      </div>
+      <div id="calendarGrid" class="calendar-multi"></div>
+      <section class="card"><h3>日期清單</h3><div id="dateAgenda" class="compact-list"></div></section>
+    </section>
+
+    <section id="samples" class="view">
+      <div class="view-title"><div><h2>樣品版本</h2></div></div>
+      <div id="sampleList" class="sample-grid"></div>
+    </section>
+
+    <section id="attachments" class="view">
+      <div class="view-title"><div><h2>照片 / 附件</h2></div></div>
+      <div id="attachmentList" class="attachment-grid"></div>
+    </section>
+
+  </main>
+
+  <div id="recordModal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="recordModalTitle">
+      <div class="modal-head">
+        <h3 id="recordModalTitle">查看記事</h3>
+        <button id="recordModalClose" class="mini" type="button">關閉</button>
+      </div>
+      <div id="recordModalBody" class="modal-body"></div>
+    </div>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="js/components/mainMenu.js"></script>
+  <script src="data/excelRecords.js"></script>
+  <script src="js/config/supabaseConfig.js"></script>
+  <script src="js/config/projectInfoTemplate.js"></script>
+  <script src="js/services/supabaseService.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
