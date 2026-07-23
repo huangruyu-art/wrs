@@ -548,7 +548,7 @@ function projectStatusByKey(key) {
 function hasProjectScheduleDates(config) {
   if (!config) return false;
   if (config.baseDate || config.targetDate) return true;
-  return Object.values(config.nodeDates || {}).some(d => d && (d.start_date || d.planned_date || d.actual_date));
+  return Object.values(config.nodeDates || {}).some(d => d && (d.planned_start_date || d.planned_end_date || d.actual_start_date || d.actual_end_date || d.start_date || d.planned_date || d.actual_date));
 }
 function renderProjectInfoEditor(key) {
   return `<section class="project-info-box open settings-project-info">
@@ -559,47 +559,61 @@ function renderProjectInfoEditor(key) {
 function hasOwn(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj || {}, prop);
 }
+function normalizeScheduleDates(item = {}) {
+  const plannedEnd = item.planned_end_date || item.planned_date || '';
+  const plannedStart = item.planned_start_date || item.start_date || plannedEnd || '';
+  const actualEnd = item.actual_end_date || item.actual_date || '';
+  const actualStart = item.actual_start_date || '';
+  return {
+    ...item,
+    planned_start_date: plannedStart,
+    planned_end_date: plannedEnd,
+    actual_start_date: actualStart,
+    actual_end_date: actualEnd
+  };
+}
 function renderScheduleDateControl(projectKey, nodeId, field, value, title) {
-  const attr = field === 'planned_date' ? 'data-schedule-planned' : (field === 'start_date' ? 'data-schedule-start' : 'data-schedule-actual');
   const safeTitle = title ? ` title="${escapeHtml(title)}"` : '';
-  return `<div class="schedule-date-control"><input class="table-date-input" ${attr}="${escapeHtml(projectKey)}" data-node-id="${escapeHtml(nodeId)}" type="date" value="${escapeHtml(value || '')}"${safeTitle} /></div>`;
+  return `<div class="schedule-date-control"><input class="table-date-input" data-schedule-date="${escapeHtml(projectKey)}" data-node-id="${escapeHtml(nodeId)}" data-date-field="${escapeHtml(field)}" type="date" value="${escapeHtml(value || '')}"${safeTitle} /></div>`;
 }
 function calculateProjectSchedule(key) {
   const config = getScheduleForProject(key);
   const nodes = Array.isArray(config.scheduleNodes) ? config.scheduleNodes : [];
   const saved = config.nodeDates || {};
   if (!nodes.length) return [];
-  let rows = [];
-  if (config.mode === 'backward') {
-    if (!config.targetDate) return [];
-    rows = nodes.map(n => ({...n, planned_date: ''}));
+  let calculated = [];
+  if (config.mode === 'backward' && config.targetDate) {
+    calculated = nodes.map(n => ({...n, calculated_end_date: ''}));
     let current = config.targetDate;
-    for (let i = rows.length - 1; i >= 0; i--) {
-      rows[i].planned_date = current;
-      if (i > 0) current = subtractWorkDays(current, Number(rows[i].work_days || 0));
+    for (let i = calculated.length - 1; i >= 0; i--) {
+      calculated[i].calculated_end_date = current;
+      if (i > 0) current = subtractWorkDays(current, Number(calculated[i].work_days || 0));
     }
-  } else {
-    if (!config.baseDate) return [];
+  } else if (config.mode !== 'backward' && config.baseDate) {
     let current = config.baseDate;
-    rows = nodes.map((n, i) => {
+    calculated = nodes.map((n, i) => {
       current = i === 0 ? config.baseDate : addWorkDays(current, Number(n.work_days || 0));
-      return {...n, planned_date: current};
+      return {...n, calculated_end_date: current};
     });
+  } else {
+    calculated = nodes.map(n => ({...n, calculated_end_date: ''}));
   }
-  let previousPlanned = '';
-  return rows.map((n, i) => {
-    const item = saved[n.id] || {};
-    const planned = hasOwn(item, 'planned_date') ? (item.planned_date || '') : (n.planned_date || '');
-    const calculatedStart = config.mode === 'backward'
-      ? subtractWorkDays(planned, Number(n.work_days || 0))
-      : (i === 0 ? (config.baseDate || '') : previousPlanned);
-    previousPlanned = planned;
+  let previousEnd = '';
+  return calculated.map((n, i) => {
+    const item = normalizeScheduleDates(saved[n.id] || {});
+    const computedEnd = n.calculated_end_date || '';
+    const computedStart = computedEnd
+      ? (config.mode === 'backward' ? subtractWorkDays(computedEnd, Number(n.work_days || 0)) : (i === 0 ? (config.baseDate || computedEnd) : (previousEnd || computedEnd)))
+      : '';
+    previousEnd = computedEnd || item.planned_end_date || previousEnd;
     return {
       ...n,
-      start_date: hasOwn(item, 'start_date') ? (item.start_date || '') : '',
-      planned_date: planned,
-      calculated_date: n.planned_date || '',
-      actual_date: hasOwn(item, 'actual_date') ? (item.actual_date || '') : ''
+      planned_start_date: hasOwn(saved[n.id] || {}, 'planned_start_date') || hasOwn(saved[n.id] || {}, 'start_date') ? item.planned_start_date : computedStart,
+      planned_end_date: hasOwn(saved[n.id] || {}, 'planned_end_date') || hasOwn(saved[n.id] || {}, 'planned_date') ? item.planned_end_date : computedEnd,
+      actual_start_date: item.actual_start_date,
+      actual_end_date: item.actual_end_date,
+      calculated_start_date: computedStart,
+      calculated_end_date: computedEnd
     };
   });
 }
@@ -609,10 +623,9 @@ function renderProjectScheduleEditor(projectKey) {
   const saved = config.nodeDates || {};
   const rows = calculatedRows.length ? calculatedRows : (config.scheduleNodes || []).slice().sort((a,b)=>Number(a.sort_order || 0)-Number(b.sort_order || 0)).map(n => ({
     ...n,
-    start_date: saved[n.id]?.start_date || '',
-    planned_date: saved[n.id]?.planned_date || '',
-    calculated_date: '',
-    actual_date: saved[n.id]?.actual_date || ''
+    ...normalizeScheduleDates(saved[n.id] || {}),
+    calculated_start_date: '',
+    calculated_end_date: ''
   }));
   return `<div class="schedule-editor">
     <h4>上市時程設定</h4>
@@ -632,16 +645,17 @@ function renderProjectScheduleEditor(projectKey) {
       <button type="button" class="mini" data-project-node-add="${escapeHtml(projectKey)}">新增專案時程節點</button>
     </div>
     <div class="schedule-table-wrap no-inner-scroll">
-      <table class="field-table compact-table editable-schedule-table"><thead><tr><th>#</th><th>工作項目</th><th>工作日</th><th>推估完成日</th><th>開始執行日</th><th>實際完成日</th><th>操作</th></tr></thead>
+      <table class="field-table compact-table editable-schedule-table"><thead><tr><th>#</th><th>工作項目</th><th>工作日</th><th>預計開始日</th><th>預計完成日</th><th>實際開始日</th><th>實際完成日</th><th>操作</th></tr></thead>
       <tbody>${rows.map((n,i)=>`<tr>
         <td>${i+1}</td>
         <td><input class="table-text-input" data-project-node-name="${escapeHtml(projectKey)}" data-node-id="${escapeHtml(n.id)}" type="text" value="${escapeHtml(n.node_name)}" /></td>
         <td><input class="table-number-input" data-project-node-days="${escapeHtml(projectKey)}" data-node-id="${escapeHtml(n.id)}" type="number" min="0" step="1" value="${Number(n.work_days || 0)}" /></td>
-        <td>${renderScheduleDateControl(projectKey, n.id, 'planned_date', n.planned_date, `原推算：${n.calculated_date || '未設定'}`)}</td>
-        <td>${renderScheduleDateControl(projectKey, n.id, 'start_date', n.start_date, '')}</td>
-        <td>${renderScheduleDateControl(projectKey, n.id, 'actual_date', n.actual_date, '')}</td>
+        <td>${renderScheduleDateControl(projectKey, n.id, 'planned_start_date', n.planned_start_date, `推算開始：${n.calculated_start_date || '未設定'}`)}</td>
+        <td>${renderScheduleDateControl(projectKey, n.id, 'planned_end_date', n.planned_end_date, `推算完成：${n.calculated_end_date || '未設定'}`)}</td>
+        <td>${renderScheduleDateControl(projectKey, n.id, 'actual_start_date', n.actual_start_date, '')}</td>
+        <td>${renderScheduleDateControl(projectKey, n.id, 'actual_end_date', n.actual_end_date, '')}</td>
         <td><span class="node-actions"><button class="mini" data-project-node-up="${escapeHtml(projectKey)}" data-node-id="${escapeHtml(n.id)}">上移</button><button class="mini" data-project-node-down="${escapeHtml(projectKey)}" data-node-id="${escapeHtml(n.id)}">下移</button><button class="mini danger" data-project-node-remove="${escapeHtml(projectKey)}" data-node-id="${escapeHtml(n.id)}">移除</button></span></td>
-      </tr>`).join('') || '<tr><td colspan="7">此專案尚無時程節點。可按上方「新增專案時程節點」。</td></tr>'}</tbody></table>
+      </tr>`).join('') || '<tr><td colspan="8">此專案尚無時程節點。可按上方「新增專案時程節點」。</td></tr>'}</tbody></table>
     </div>
   </div>`;
 }
@@ -657,7 +671,8 @@ function renderProjects() {
     const scheduleRows = calculateProjectSchedule(p.key);
     const config = getScheduleForProject(p.key);
     const projectStatus = projectStatusByKey(p.key);
-    const scheduleSummary = scheduleRows.length ? `${scheduleRows[0].planned_date || '-'} → ${scheduleRows[scheduleRows.length-1].planned_date || '-'}` : '尚未設定';
+    const datedRows = scheduleRows.filter(r => r.planned_start_date || r.planned_end_date || r.actual_start_date || r.actual_end_date);
+    const scheduleSummary = datedRows.length ? `${datedRows[0].planned_start_date || datedRows[0].planned_end_date || '-'} → ${datedRows[datedRows.length-1].planned_end_date || datedRows[datedRows.length-1].planned_start_date || '-'}` : '尚未設定';
     return `<article class="project-card project-card-wide">
       <div class="record-top"><strong>${escapeHtml(parts[0])}</strong><span class="pill">${p.count} 筆歷程</span></div>
       <h3>${escapeHtml(parts[1])}</h3>
@@ -857,9 +872,11 @@ function bindDynamicActions() {
   document.querySelectorAll('[data-schedule-mode]').forEach(el => el.onchange = () => updateProjectSchedule(el.dataset.scheduleMode, 'mode', el.value));
   document.querySelectorAll('[data-schedule-base]').forEach(el => el.onchange = () => updateProjectSchedule(el.dataset.scheduleBase, 'baseDate', el.value));
   document.querySelectorAll('[data-schedule-target]').forEach(el => el.onchange = () => updateProjectSchedule(el.dataset.scheduleTarget, 'targetDate', el.value));
-  document.querySelectorAll('[data-schedule-start]').forEach(el => { el.onchange = () => updateProjectScheduleNodeDate(el.dataset.scheduleStart, el.dataset.nodeId, 'start_date', el.value); el.oninput = () => { if (!el.value) updateProjectScheduleNodeDate(el.dataset.scheduleStart, el.dataset.nodeId, 'start_date', ''); }; });
-  document.querySelectorAll('[data-schedule-planned]').forEach(el => { el.onchange = () => updateProjectScheduleNodeDate(el.dataset.schedulePlanned, el.dataset.nodeId, 'planned_date', el.value); el.oninput = () => { if (!el.value) updateProjectScheduleNodeDate(el.dataset.schedulePlanned, el.dataset.nodeId, 'planned_date', ''); }; });
-  document.querySelectorAll('[data-schedule-actual]').forEach(el => { el.onchange = () => updateProjectScheduleNodeDate(el.dataset.scheduleActual, el.dataset.nodeId, 'actual_date', el.value); el.oninput = () => { if (!el.value) updateProjectScheduleNodeDate(el.dataset.scheduleActual, el.dataset.nodeId, 'actual_date', ''); }; });
+  document.querySelectorAll('[data-schedule-date]').forEach(el => {
+    const saveDate = () => updateProjectScheduleNodeDate(el.dataset.scheduleDate, el.dataset.nodeId, el.dataset.dateField, el.value);
+    el.onchange = saveDate;
+    el.oninput = () => { if (!el.value) saveDate(); };
+  });
   document.querySelectorAll('[data-project-node-name]').forEach(el => el.onchange = () => updateProjectScheduleNode(el.dataset.projectNodeName, el.dataset.nodeId, 'node_name', el.value));
   document.querySelectorAll('[data-project-node-dept]').forEach(el => el.onchange = () => updateProjectScheduleNode(el.dataset.projectNodeDept, el.dataset.nodeId, 'department', el.value));
   document.querySelectorAll('[data-project-node-days]').forEach(el => el.onchange = () => updateProjectScheduleNode(el.dataset.projectNodeDays, el.dataset.nodeId, 'work_days', el.value));
@@ -949,11 +966,9 @@ function updateProjectScheduleNodeDate(key, nodeId, field, value) {
   nodeDates[nodeId] = {...(nodeDates[nodeId] || {}), [field]: value};
   state.projectSchedules[key] = {...config, nodeDates};
   writeStore(); renderAll();
-  if (!value) {
-    toast(field === 'actual_date' ? '實際完成日已設為未設定' : (field === 'start_date' ? '開始執行日已設為未設定' : '推估完成日已設為未設定'));
-  } else {
-    toast(field === 'actual_date' ? '已更新實際完成日' : (field === 'start_date' ? '已更新開始執行日' : '已更新推估完成日'));
-  }
+  const labels = { planned_start_date: '預計開始日', planned_end_date: '預計完成日', actual_start_date: '實際開始日', actual_end_date: '實際完成日' };
+  const label = labels[field] || '日期';
+  toast(value ? `已更新${label}` : `${label}已設為未設定`);
 }
 function importExcel() {
   const imported = (window.excelRecords || []).map(normalizeRecord);
@@ -1226,6 +1241,9 @@ function init() {
   });
   textareaObserver.observe(document.body, { childList: true, subtree: true });
   document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => switchView(b.dataset.view)));
+  const initialHash = window.location.hash.replace('#','');
+  if (initialHash && document.getElementById(initialHash)) switchView(initialHash);
+  window.addEventListener('hashchange', () => { const view = window.location.hash.replace('#',''); if (view && document.getElementById(view)) switchView(view); });
   document.querySelectorAll('.flow-step').forEach(b => b.addEventListener('click', () => switchView(b.dataset.go)));
   document.querySelectorAll('.settings-tab').forEach(b => b.addEventListener('click', () => switchSettingsTab(b.dataset.settingsTab)));
   $('recordForm').addEventListener('submit', saveForm);

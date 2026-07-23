@@ -402,6 +402,34 @@
     }));
   }
 
+  function normalizeNodeDates(d) {
+    d = d || {};
+    return {
+      planned_start_date: d.planned_start_date || d.start_date || null,
+      planned_end_date: d.planned_end_date || d.planned_date || null,
+      actual_start_date: d.actual_start_date || null,
+      actual_end_date: d.actual_end_date || d.actual_date || null
+    };
+  }
+
+  function toProjectScheduleNodeRows(projectSchedules) {
+    const rows = [];
+    Object.entries(projectSchedules || {}).forEach(([project_key, config]) => {
+      (config.scheduleNodes || []).forEach((node, index) => {
+        const dates = normalizeNodeDates((config.nodeDates || {})[node.id]);
+        rows.push(Object.assign(sharedAuditFields(), dates, {
+          project_key,
+          node_id: String(node.id),
+          node_name: node.node_name || '',
+          sort_order: Number(node.sort_order || index + 1),
+          deleted_at: null,
+          updated_at: new Date().toISOString()
+        }));
+      });
+    });
+    return rows;
+  }
+
   async function testConnection() {
     if (!isAuthenticated()) throw new Error('Supabase 已設定，但尚未登入。請先登入。');
     await select('customers', 'select=name&deleted_at=is.null&limit=1');
@@ -414,11 +442,13 @@
     const productSpecs = (state.masters.productSpecs || []).map(toProductSpecRow);
     const scheduleNodes = (state.masters.scheduleNodes || []).map(toScheduleNodeRow);
     const projectSchedules = toProjectScheduleRows(state.projectSchedules || {});
+    const projectScheduleNodes = toProjectScheduleNodeRows(state.projectSchedules || {});
     const records = (state.records || []).map(toRecordRow);
     await upsert('customers', customers, 'name');
     await upsert('product_specs', productSpecs, 'customer,product_name,spec');
     await upsert('schedule_nodes', scheduleNodes, 'id');
     await upsert('project_schedules', projectSchedules, 'project_key');
+    await upsert('project_schedule_nodes', projectScheduleNodes, 'project_key,node_id');
     await upsert('work_records', records, 'id');
     return true;
   }
@@ -466,8 +496,9 @@
     }));
     if (nodeUpdates && nodeUpdates.length) {
       await upsert('project_schedule_nodes', nodeUpdates.map((x, i) => Object.assign(sharedAuditFields(), {
-        project_key: projectKey, node_id: x.node_id, sort_order: i + 1,
+        project_key: projectKey, node_id: x.node_id, node_name: x.node_name || '', sort_order: Number(x.sort_order || i + 1),
         planned_start_date: x.planned_start_date || null, planned_end_date: x.planned_end_date || null,
+        actual_start_date: x.actual_start_date || null, actual_end_date: x.actual_end_date || null,
         updated_at: new Date().toISOString(), deleted_at: null
       })), 'project_key,node_id');
     }
@@ -475,10 +506,21 @@
 
   async function updateProjectScheduleConfig(projectKey, config) {
     if (!projectKey) throw new Error('缺少專案識別資料。');
-    return patchWhere('project_schedules', 'project_key', projectKey, Object.assign(sharedAuditFields(), {
+    const nodeRows = toProjectScheduleNodeRows({ [projectKey]: config });
+    const plannedStarts = nodeRows.map(x => x.planned_start_date).filter(Boolean).sort();
+    const plannedEnds = nodeRows.map(x => x.planned_end_date).filter(Boolean).sort();
+    const actualStarts = nodeRows.map(x => x.actual_start_date).filter(Boolean).sort();
+    const actualEnds = nodeRows.map(x => x.actual_end_date).filter(Boolean).sort();
+    await patchWhere('project_schedules', 'project_key', projectKey, Object.assign(sharedAuditFields(), {
       config,
+      planned_start_date: plannedStarts[0] || null,
+      planned_end_date: plannedEnds.slice(-1)[0] || null,
+      actual_start_date: actualStarts[0] || null,
+      actual_end_date: actualEnds.slice(-1)[0] || null,
       updated_at: new Date().toISOString()
     }));
+    if (nodeRows.length) await upsert('project_schedule_nodes', nodeRows, 'project_key,node_id');
+    return true;
   }
 
   async function listAuditLogs(limit) {

@@ -3,14 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>跨專案甘特式時間軸｜Version 1.1.0</title>
+  <title>跨專案甘特式時間軸｜Version 1.1.1</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/gantt.css" />
 </head>
 <body class="gantt-body">
   <aside data-main-menu data-page="gantt"></aside>
   <main class="gantt-main">
-    <header class="gantt-titlebar"><h1>跨專案甘特式時間軸</h1></header>
     <section class="filters" aria-label="甘特圖篩選條件">
       <label>日期起日<input id="filterStart" type="date" /></label>
       <label>日期迄日<input id="filterEnd" type="date" /></label>
@@ -23,7 +22,8 @@
         <output id="zoomLabel">日</output><button id="zoomInBtn" type="button" title="放大">＋</button><button id="fitAllBtn" type="button">全部</button>
       </div>
     </section>
-    <section id="statusBanner" class="status-banner" aria-live="polite"></section>
+    <header class="gantt-titlebar"><h1>甘特式時間軸</h1></header>
+    <section id="statusBanner" class="status-banner" aria-live="polite" hidden></section>
     <section class="gantt-shell">
       <div id="ganttEmpty" class="empty-state" hidden>目前沒有符合條件、且已設定日期的專案節點。</div>
       <div id="ganttScroller" class="gantt-scroller"><div id="ganttCanvas" class="gantt-canvas"></div></div>
