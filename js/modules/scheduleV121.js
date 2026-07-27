@@ -389,17 +389,25 @@
         controls.querySelector('[data-v121-dependencies]').onclick=()=>openModal(key,nodeId);
       }
       const controls=row.querySelector('.v121-node-controls');
-      controls.querySelector('[data-v121-node-type]').value=typeOf(node);
-      controls.querySelector('[data-v121-dependency-summary]').textContent=dependencySummary(config,nodeId);
+      const typeSelect=controls.querySelector('[data-v121-node-type]');
+      const nextType=typeOf(node);
+      if(typeSelect.value!==nextType) typeSelect.value=nextType;
+
+      const summary=controls.querySelector('[data-v121-dependency-summary]');
+      const nextSummary=dependencySummary(config,nodeId);
+      if(summary.textContent!==nextSummary) summary.textContent=nextSummary;
+
       const conflict=conflictFor(config,nodeId);
       const warning=controls.querySelector('[data-v121-conflict]');
-      warning.textContent=conflict?`⚠ ${conflict}`:'';
-      warning.hidden=!conflict;
+      const nextWarning=conflict?`⚠ ${conflict}`:'';
+      if(warning.textContent!==nextWarning) warning.textContent=nextWarning;
+      if(warning.hidden===Boolean(conflict)) warning.hidden=!conflict;
 
       const numberInput=Array.from(row.querySelectorAll('input[type="number"]')).find(input=>!input.closest('.v121-node-controls'));
       if(numberInput){
-        numberInput.disabled=typeOf(node)===MILESTONE;
-        if(typeOf(node)===MILESTONE) numberInput.value='0';
+        const shouldDisable=nextType===MILESTONE;
+        if(numberInput.disabled!==shouldDisable) numberInput.disabled=shouldDisable;
+        if(shouldDisable&&numberInput.value!=='0') numberInput.value='0';
       }
 
       const recalc=row.querySelector('.v120-recalc-controls');
@@ -439,10 +447,38 @@
     document.head.appendChild(style);
   }
 
+  let editorObserver=null;
+  let decorateQueued=false;
+  let decorating=false;
+
+  function observeEditors(){
+    editorObserver?.observe(document.body,{childList:true,subtree:true});
+  }
+
+  function scheduleDecorateEditors(){
+    if(decorateQueued||decorating) return;
+    decorateQueued=true;
+    const run=()=>{
+      decorateQueued=false;
+      if(decorating) return;
+      decorating=true;
+      editorObserver?.disconnect();
+      try{
+        decorateEditors();
+      }finally{
+        decorating=false;
+        observeEditors();
+      }
+    };
+    if(typeof requestAnimationFrame==='function') requestAnimationFrame(run);
+    else setTimeout(run,0);
+  }
+
   migrateAll();
   renderAll();
   decorateEditors();
-  new MutationObserver(decorateEditors).observe(document.body,{childList:true,subtree:true});
+  editorObserver=new MutationObserver(scheduleDecorateEditors);
+  observeEditors();
 
   window.WR_SCHEDULE_V121={
     TASK,MILESTONE,recalculate,normalizeDependencies,topological,descendants,migrateConfig
