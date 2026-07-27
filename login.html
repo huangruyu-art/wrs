@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>工作記錄｜登入｜Version 1.2.0</title>
+  <link rel="stylesheet" href="css/login.css" />
+</head>
+<body>
+  <main class="login-shell">
+    <section class="login-card" aria-labelledby="loginTitle">
+      <header>
+        <p class="eyebrow">WORK RECORD SYSTEM</p>
+        <h1 id="loginTitle">工作記錄系統</h1>
+        <p>請先登入，再進入工作記錄。</p>
+      </header>
+
+      <div id="loginMessage" class="message" aria-live="polite"></div>
+
+      <form id="loginForm">
+        <label>Email
+          <input id="loginEmail" type="email" autocomplete="email" required />
+        </label>
+        <label>密碼
+          <input id="loginPassword" type="password" autocomplete="current-password" required />
+        </label>
+        <button id="loginSubmit" class="primary" type="submit">登入</button>
+      </form>
+
+      <button id="forgotPasswordBtn" class="link-button" type="button">忘記密碼／寄送重設信</button>
+
+      <section id="recoveryBox" class="recovery-box" hidden>
+        <h2>設定新密碼</h2>
+        <label>新密碼
+          <input id="newPassword" type="password" autocomplete="new-password" minlength="8" />
+        </label>
+        <label>再次輸入新密碼
+          <input id="confirmPassword" type="password" autocomplete="new-password" minlength="8" />
+        </label>
+        <button id="updatePasswordBtn" class="primary" type="button">更新密碼</button>
+      </section>
+
+      <p class="version">Version 1.2.0</p>
+    </section>
+  </main>
+
+  <script src="js/config/supabaseConfig.js"></script>
+  <script src="js/services/supabaseService.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>
