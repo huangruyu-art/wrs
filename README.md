@@ -1,31 +1,37 @@
-# 工作記錄系統 v1.2.0
+# 工作記錄系統 v1.2.1
 
-本版依 `02_v1.2.0功能規格.md` 完成獨立登入頁，以及上市時程日期的 AUTO／MANUAL 規則。
+本版在 v1.2.0 的登入與 AUTO／MANUAL 日期保護規則上，加入通用的節點依賴功能。
 
-## v1.2.0 變更
+## v1.2.1 變更
 
-- 新增 `login.html`，提供 Email／Password 登入與忘記密碼功能。
-- 未登入時由 `index.html`、`gantt.html` 導向登入頁；登入成功後返回原功能頁。
-- 密碼重設信統一導向 `login.html`。
-- 每個專案節點新增 `data_mode`：`AUTO` 或 `MANUAL`。
-- 第一次輸入第一節點起算日，依工作日向後推算日期。
-- 第一次輸入目標上市／可出貨日，依工作日向前回推日期。
-- 專案建立完成後停止自動推算；使用者修改或清除任一日期後，該節點改為 `MANUAL`。
-- 新增「重新計算日期」，支援僅本節點、本節點＋後續節點、整個專案三種範圍。
-- 重新計算範圍內的節點恢復為 `AUTO`。
-- 甘特圖拖曳後的節點改為 `MANUAL`，並與設定頁共用同一份日期資料。
-- 新增 Supabase migration，保存 `project_schedule_nodes.data_mode`。
+- 節點類型分為 `TASK`（工作節點）與 `MILESTONE`（里程碑）。
+- 里程碑工作日固定為 0，甘特圖以菱形顯示。
+- 每個專案節點可自行設定 0 個、1 個或多個前置任務。
+- v1.2.1 的前置關係固定為 FS（前置任務完成後開始）。
+- 每筆前置關係可設定間隔工作日 `lag_work_days`。
+- 多個前置任務必須全部完成，本節點才可開始；日期取各限制日期中最晚者。
+- 支援平行工作；節點畫面排序不再代表前置任務關係。
+- 儲存前檢查自我依賴與循環依賴。
+- 「目前節點＋後續節點」改依依賴關係找出受影響節點，不再只看排序。
+- `MANUAL` 節點若早於前置任務允許日期，只顯示警告，不直接覆蓋。
+- 甘特圖顯示里程碑、前置任務箭頭與日期衝突警告。
+- 甘特圖選擇「相依後續節點一起順延」時，只順延真正依賴該節點的後續節點。
 
-## 主要新增檔案
+## 資料庫調整
 
-- `login.html`
-- `css/login.css`
-- `js/login.js`
-- `js/authGuard.js`
-- `js/services/supabaseServiceV120.js`
-- `js/modules/scheduleV120.js`
-- `supabase/migrations/20260727_add_project_schedule_node_data_mode.sql`
+- `project_schedule_nodes.node_type`
+- 新表 `project_schedule_node_dependencies`
 
-## 資料保護原則
+請先執行：
 
-重新整理、重新登入、設定頁同步及甘特圖同步，都不會重新推算並覆蓋已儲存日期。只有使用者主動按下「重新計算日期」時，指定範圍才會重新依工作日計算。
+```text
+supabase/migrations/20260727_add_node_type_and_dependencies.sql
+```
+
+## 相容原則
+
+- 既有節點預設為 `TASK`。
+- 不替既有資料自動建立前置任務。
+- 不自動重新計算既有日期。
+- 保留既有四日期與 `AUTO`／`MANUAL` 設定。
+- 不寫死任何節點名稱或產業流程。
