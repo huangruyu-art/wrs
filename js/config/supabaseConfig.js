@@ -4,11 +4,10 @@
 // 3. enabled 改成 true
 // 注意：不要把 service_role key 放在前端檔案中。
 window.WORK_RECORD_SUPABASE_CONFIG = {
-  enabled: true, 
-  url: 'https://kktwhdlynoscxueslebq.supabase.co', 
-  anonKey: 'sb_publishable_XLBFPpW9i9n09TzCYq1mJA_Nyywv_Fr', 
+  enabled: true,
+  url: 'https://kktwhdlynoscxueslebq.supabase.co',
+  anonKey: 'sb_publishable_XLBFPpW9i9n09TzCYq1mJA_Nyywv_Fr',
   schema: 'public',
-  // 密碼重設信點開後要回到的完整網址。留空時，http/https 網頁會自動使用目前頁面網址。
-  // 若平常直接以 file:// 開啟，建議填 GitHub Pages 或其他已部署的 index.html 網址。
-  passwordResetRedirectUrl: 'https://huangruyu-art.github.io/wrs/'
+  // v1.2.0：忘記密碼信件統一回到獨立登入頁。
+  passwordResetRedirectUrl: 'https://huangruyu-art.github.io/wrs/login.html'
 };
